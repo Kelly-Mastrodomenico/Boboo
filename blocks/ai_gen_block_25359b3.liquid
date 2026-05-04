@@ -1,0 +1,391 @@
+{% doc %}
+  @prompt
+    Hero, del lado derecho agregar una imagen y del lado izquierdo <div class="boboo-hero-content">
+      <span class="boboo-eyebrow">Ropa infantil artesanal</span>
+      <h1 class="titulo">El regalo que <span>guardarán</span><br>para siempre.</h1>
+      <p class="subtitulo">Ropa artesanal para bebés y niños que emociona a quien la da y a quien la recibe. Porque los primeros años merecen algo especial.</p>
+      <a href="/collections/all" class="button">Descubrir colección</a>
+    </div>
+    la separacion que sea un degrades, como la imagen adjunta, y el circulo de hecho a mano, elimina el hecho a mano, No mantuviste las clases: <div class="boboo-hero-content">
+      <span class="boboo-eyebrow">Ropa infantil artesanal</span>
+      <h1 class="titulo">El regalo que <span>guardarán</span><br>para siempre.</h1>
+      <p class="subtitulo">Ropa artesanal para bebés y niños que emociona a quien la da y a quien la recibe. Porque los primeros años merecen algo especial.</p>
+      <a href="/collections/all" class="button">Descubrir colección</a>
+    </div>, No aparece todo el boton, y el hero debe ocupar pantalla completa en modo escritorio
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .boboo-hero-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .boboo-hero-container-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 100vh;
+    position: relative;
+  }
+
+  .boboo-hero-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: {{ block.settings.content_padding }}px;
+    position: relative;
+    z-index: 2;
+    background: {{ block.settings.content_background }};
+  }
+
+  .boboo-eyebrow {
+    font-size: {{ block.settings.eyebrow_size }}px;
+    color: {{ block.settings.eyebrow_color }};
+    margin-bottom: 16px;
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .titulo {
+    font-size: {{ block.settings.title_size }}px;
+    line-height: 1.1;
+    color: {{ block.settings.title_color }};
+    margin: 0 0 20px 0;
+  }
+
+  .titulo span {
+    font-style: italic;
+  }
+
+  .subtitulo {
+    font-size: {{ block.settings.subtitle_size }}px;
+    line-height: 1.6;
+    color: {{ block.settings.subtitle_color }};
+    margin: 0 0 32px 0;
+  }
+
+  .boboo-hero-content .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 32px;
+    background-color: {{ block.settings.button_background }};
+    color: {{ block.settings.button_text_color }};
+    text-decoration: none;
+    border-radius: {{ block.settings.button_radius }}px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    align-self: flex-start;
+    white-space: nowrap;
+  }
+
+  .boboo-hero-content .button:hover {
+    background-color: {{ block.settings.button_hover_background }};
+    color: {{ block.settings.button_hover_text_color }};
+  }
+
+  .boboo-hero-image-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .boboo-hero-image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .boboo-hero-gradient-{{ ai_gen_id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      to right,
+      {{ block.settings.content_background }} 0%,
+      rgba(255, 255, 255, 0) {{ block.settings.gradient_width }}%
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .boboo-hero-image-placeholder-{{ ai_gen_id }} {
+    background-color: #f4f4f4;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .boboo-hero-image-placeholder-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: 100%;
+    max-width: 500px;
+    max-height: 500px;
+  }
+
+  @media screen and (max-width: 749px) {
+    .boboo-hero-container-{{ ai_gen_id }} {
+      grid-template-columns: 1fr;
+      min-height: 100vh;
+    }
+
+    .boboo-hero-content {
+      order: 2;
+      padding: 32px 20px;
+    }
+
+    .boboo-hero-image-wrapper-{{ ai_gen_id }} {
+      order: 1;
+      min-height: 50vh;
+    }
+
+    .boboo-hero-gradient-{{ ai_gen_id }} {
+      background: linear-gradient(
+        to top,
+        {{ block.settings.content_background }} 0%,
+        rgba(255, 255, 255, 0) 30%
+      );
+    }
+
+    .titulo {
+      font-size: {{ block.settings.title_size | times: 0.6 }}px;
+    }
+
+    .boboo-eyebrow {
+      font-size: {{ block.settings.eyebrow_size | times: 0.9 }}px;
+    }
+
+    .subtitulo {
+      font-size: {{ block.settings.subtitle_size | times: 0.9 }}px;
+    }
+  }
+{% endstyle %}
+
+<div class="boboo-hero-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="boboo-hero-container-{{ ai_gen_id }}">
+    <div class="boboo-hero-content">
+      {% if block.settings.eyebrow != blank %}
+        <span class="boboo-eyebrow">{{ block.settings.eyebrow }}</span>
+      {% endif %}
+
+      {% if block.settings.title != blank %}
+        <h1 class="titulo">{{ block.settings.title }}</h1>
+      {% endif %}
+
+      {% if block.settings.subtitle != blank %}
+        <p class="subtitulo">{{ block.settings.subtitle }}</p>
+      {% endif %}
+
+      {% if block.settings.button_label != blank and block.settings.button_link != blank %}
+        <a href="{{ block.settings.button_link }}" class="button">
+          {{ block.settings.button_label }}
+        </a>
+      {% endif %}
+    </div>
+
+    <div class="boboo-hero-image-wrapper-{{ ai_gen_id }}">
+      {% if block.settings.hero_image %}
+        <img
+          src="{{ block.settings.hero_image | image_url: width: 1500 }}"
+          alt="{{ block.settings.hero_image.alt | escape }}"
+          class="boboo-hero-image-{{ ai_gen_id }}"
+          loading="eager"
+          width="{{ block.settings.hero_image.width }}"
+          height="{{ block.settings.hero_image.height }}"
+        >
+      {% else %}
+        <div class="boboo-hero-image-placeholder-{{ ai_gen_id }}">
+          {{ 'hero-apparel-1' | placeholder_svg_tag }}
+        </div>
+      {% endif %}
+
+      <div class="boboo-hero-gradient-{{ ai_gen_id }}"></div>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Hero BOBOÓ",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Contenido"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Texto superior",
+      "default": "Ropa infantil artesanal"
+    },
+    {
+      "type": "textarea",
+      "id": "title",
+      "label": "Título",
+      "default": "El regalo que guardarán para siempre."
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Subtítulo",
+      "default": "Ropa artesanal para bebés y niños que emociona a quien la da y a quien la recibe. Porque los primeros años merecen algo especial."
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Texto del botón",
+      "default": "Descubrir colección"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Enlace del botón"
+    },
+    {
+      "type": "header",
+      "content": "Imagen"
+    },
+    {
+      "type": "image_picker",
+      "id": "hero_image",
+      "label": "Imagen del hero"
+    },
+    {
+      "type": "header",
+      "content": "Degradado"
+    },
+    {
+      "type": "range",
+      "id": "gradient_width",
+      "label": "Ancho del degradado",
+      "min": 10,
+      "max": 50,
+      "step": 5,
+      "unit": "%",
+      "default": 30
+    },
+    {
+      "type": "header",
+      "content": "Estilo del contenido"
+    },
+    {
+      "type": "color",
+      "id": "content_background",
+      "label": "Fondo del contenido",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "content_padding",
+      "label": "Espaciado interno",
+      "min": 20,
+      "max": 100,
+      "step": 10,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "header",
+      "content": "Tipografía"
+    },
+    {
+      "type": "range",
+      "id": "eyebrow_size",
+      "label": "Tamaño texto superior",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "color",
+      "id": "eyebrow_color",
+      "label": "Color texto superior",
+      "default": "#666666"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "label": "Tamaño del título",
+      "min": 24,
+      "max": 72,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Color del título",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "subtitle_size",
+      "label": "Tamaño del subtítulo",
+      "min": 12,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "subtitle_color",
+      "label": "Color del subtítulo",
+      "default": "#666666"
+    },
+    {
+      "type": "header",
+      "content": "Botón"
+    },
+    {
+      "type": "color",
+      "id": "button_background",
+      "label": "Fondo del botón",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Texto del botón",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_background",
+      "label": "Fondo hover",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_text_color",
+      "label": "Texto hover",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "button_radius",
+      "label": "Radio del botón",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 14
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero BOBOÓ"
+    }
+  ]
+}
+{% endschema %}

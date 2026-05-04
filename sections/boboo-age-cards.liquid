@@ -1,0 +1,482 @@
+{%- comment -%}
+  BOBOÓ — Tarjetas por edad / talla
+  Sesión 2 — Sección custom (sobrevive actualizaciones del tema)
+
+  DISEÑO:
+  · 4 tarjetas en grid (2×2 en mobile, 4×1 en desktop)
+  · Cada tarjeta: imagen de fondo + overlay degradado oscuro desde abajo
+  · Sobre el overlay: nombre de etapa (Cormorant) + rango de edad + CTA link
+  · Imagen hover opcional (segundo ángulo, crossfade CSS)
+  · Tilt 3D en hover: perspective CSS + JS mousemove via boboo-main.js
+  · Shape divider CURVE invertida en la parte inferior (hacia siguiente sección)
+  · Animaciones de entrada: boboo-reveal (IntersectionObserver)
+
+  SIN GSAP — el stagger coordinado se hace con CSS transition-delay escalonado.
+  Eliminamos la dependencia de window.BobooGSAP para que funcione sin boboo-gsap.js
+
+  SCHEMA:
+  · Título y eyebrow de la sección
+  · Hasta 6 bloques de tarjeta (imagen principal, imagen hover, etiqueta, rango, URL)
+{%- endcomment -%}
+
+<section class="boboo-ages" id="por-edad" aria-label="Compra por edad">
+
+  {%- comment -%} Cabecera de sección {%- endcomment -%}
+  <div class="boboo-ages__header boboo-reveal">
+    <p class="boboo-ages__eyebrow">{{ section.settings.eyebrow | default: 'Para cada etapa' }}</p>
+    <h2 class="boboo-ages__title">
+      {{- section.settings.heading | default: '¿Cuánto tiene <em>el peque?</em>' -}}
+    </h2>
+  </div>
+
+  {%- comment -%} Grid de tarjetas {%- endcomment -%}
+  <div class="boboo-ages__grid">
+    {%- for block in section.blocks -%}
+      <a
+        href="{{ block.settings.url | default: '/collections/all' }}"
+        class="boboo-age-card tilt-card boboo-reveal boboo-reveal--delay-{{ forloop.index }}"
+        aria-label="Ver colección {{ block.settings.label }}"
+        {{ block.shopify_attributes }}
+      >
+        {%- comment -%} Imagen principal {%- endcomment -%}
+        {%- if block.settings.image != blank -%}
+          <img
+            class="boboo-age-card__img"
+            src="{{ block.settings.image | image_url: width: 600 }}"
+            srcset="
+              {{ block.settings.image | image_url: width: 400 }} 400w,
+              {{ block.settings.image | image_url: width: 600 }} 600w,
+              {{ block.settings.image | image_url: width: 800 }} 800w
+            "
+            sizes="(max-width: 640px) 50vw, 25vw"
+            alt="{{ block.settings.image.alt | default: block.settings.label | escape }}"
+            width="{{ block.settings.image.width }}"
+            height="{{ block.settings.image.height }}"
+            loading="lazy"
+          >
+        {%- else -%}
+          <div class="boboo-age-card__placeholder" aria-hidden="true"></div>
+        {%- endif -%}
+
+        {%- comment -%}
+          Imagen en hover — se muestra con crossfade CSS al pasar el ratón.
+          Si no se configura, la tarjeta simplemente hace zoom en la imagen principal.
+        {%- endcomment -%}
+        {%- if block.settings.image_hover != blank -%}
+          <img
+            class="boboo-age-card__img boboo-age-card__img--hover"
+            src="{{ block.settings.image_hover | image_url: width: 600 }}"
+            srcset="
+              {{ block.settings.image_hover | image_url: width: 400 }} 400w,
+              {{ block.settings.image_hover | image_url: width: 600 }} 600w,
+              {{ block.settings.image_hover | image_url: width: 800 }} 800w
+            "
+            sizes="(max-width: 640px) 50vw, 25vw"
+            alt=""
+            width="{{ block.settings.image_hover.width }}"
+            height="{{ block.settings.image_hover.height }}"
+            loading="lazy"
+            aria-hidden="true"
+          >
+        {%- endif -%}
+
+        {%- comment -%} Overlay oscuro + contenido de texto {%- endcomment -%}
+        <div class="boboo-age-card__overlay" aria-hidden="true">
+          <p class="boboo-age-card__label">{{ block.settings.label | default: 'Bebé' }}</p>
+          {%- if block.settings.age_range != blank -%}
+            <p class="boboo-age-card__range">{{ block.settings.age_range }}</p>
+          {%- endif -%}
+          <span class="boboo-age-card__cta">
+            {{ block.settings.cta_text | default: 'Ver colección' }} →
+          </span>
+        </div>
+      </a>
+
+    {%- else -%}
+      {%- comment -%}
+        Placeholders cuando no hay bloques — el cliente ve la sección
+        en el editor con las etiquetas correctas aunque no haya imágenes.
+      {%- endcomment -%}
+      {%- assign default_labels = 'Recién Nacido,Bebé,Pequeñín,Explorador' | split: ',' -%}
+      {%- assign default_ranges = '0 – 3 meses,3 – 12 meses,1 – 3 años,3 – 7 años' | split: ',' -%}
+      {%- for i in (0..3) -%}
+        <div class="boboo-age-card boboo-age-card--placeholder">
+          <div class="boboo-age-card__placeholder" aria-hidden="true"></div>
+          <div class="boboo-age-card__overlay" aria-hidden="true">
+            <p class="boboo-age-card__label">{{ default_labels[i] }}</p>
+            <p class="boboo-age-card__range">{{ default_ranges[i] }}</p>
+            <span class="boboo-age-card__cta">Ver colección →</span>
+          </div>
+        </div>
+      {%- endfor -%}
+    {%- endfor -%}
+  </div>
+
+  {%- comment -%}
+    Shape divider CURVE INVERTIDA en el borde inferior.
+    La curva apunta hacia arriba, creando un "hueco" que
+    hace que la siguiente sección (cream) suba visualmente.
+    El fill usa el color de la sección siguiente (--boboo-cream).
+  {%- endcomment -%}
+  {%- if section.settings.show_bottom_divider -%}
+    <div class="boboo-ages__divider-bottom" aria-hidden="true">
+      <svg
+        viewBox="0 0 1440 48"
+        preserveAspectRatio="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M0,0 L0,24 Q360,48 720,24 Q1080,0 1440,24 L1440,0 Z"
+          fill="var(--boboo-cream, #F5EFE6)"
+        />
+      </svg>
+    </div>
+  {%- endif -%}
+
+</section>
+
+<style>
+  /* ────────────────────────────────────────────────────
+     BOBOÓ AGE CARDS — Estilos embebidos en la sección
+     Sesión 2
+  ──────────────────────────────────────────────────── */
+
+  .boboo-ages {
+    padding: 5rem 2rem 4rem;
+    background: var(--boboo-white, #FDFAF6);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ── Cabecera ── */
+  .boboo-ages__header {
+    max-width: 1280px;
+    margin: 0 auto 3rem;
+    text-align: center;
+  }
+
+  .boboo-ages__eyebrow {
+    font-family: var(--boboo-font-body, 'DM Sans', sans-serif);
+    font-size: .72rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--boboo-terracota, #C17E5A);
+    font-weight: 500;
+    margin: 0 0 1rem;
+  }
+
+  .boboo-ages__title {
+    font-family: var(--boboo-font-display, 'Cormorant Garamond', Georgia, serif);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 300;
+    line-height: 1.1;
+    color: var(--boboo-carbon, #2A2520);
+    margin: 0;
+  }
+
+  .boboo-ages__title em {
+    font-style: italic;
+    color: var(--boboo-sage-dk, #5C8068);
+  }
+
+  /* ── Grid de tarjetas ── */
+  .boboo-ages__grid {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.2rem;
+  }
+
+  /* ── Tarjeta individual ── */
+  .boboo-age-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 4px;
+    aspect-ratio: 3 / 4;
+    cursor: pointer;
+    background: var(--boboo-warm, #EDE3D8);
+    text-decoration: none;
+    display: block;
+    /* Preparar para tilt 3D — el JS de boboo-main.js aplica el transform */
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+
+  /* ── Imágenes ── */
+  .boboo-age-card__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform .6s cubic-bezier(.25, .46, .45, .94), opacity .45s ease;
+    filter: brightness(.88);
+  }
+
+  /* Zoom en hover de la imagen principal */
+  .boboo-age-card:hover .boboo-age-card__img:not(.boboo-age-card__img--hover) {
+    transform: scale(1.06);
+  }
+
+  /* Imagen hover: oculta en reposo, crossfade visible al hover */
+  .boboo-age-card__img--hover {
+    opacity: 0;
+    transition: opacity .45s ease;
+  }
+  .boboo-age-card:hover .boboo-age-card__img--hover {
+    opacity: 1;
+  }
+
+  /* Placeholder cuando no hay imagen */
+  .boboo-age-card__placeholder {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      var(--boboo-warm, #EDE3D8) 0%,
+      var(--boboo-sand, #D4C4B0) 100%
+    );
+  }
+
+  /* ── Overlay degradado + texto ── */
+  .boboo-age-card__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to top,
+      rgba(42, 37, 32, .78) 0%,
+      rgba(42, 37, 32, .15) 50%,
+      transparent 70%
+    );
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 1.8rem 1.5rem;
+    transition: background .3s ease;
+  }
+
+  /* El overlay se oscurece un poco más en hover para mejor contraste */
+  .boboo-age-card:hover .boboo-age-card__overlay {
+    background: linear-gradient(
+      to top,
+      rgba(42, 37, 32, .88) 0%,
+      rgba(42, 37, 32, .2) 55%,
+      transparent 72%
+    );
+  }
+
+  /* Etiqueta de etapa (ej: "Recién Nacido") */
+  .boboo-age-card__label {
+    font-family: var(--boboo-font-display, 'Cormorant Garamond', Georgia, serif);
+    font-size: 1.8rem;
+    font-weight: 300;
+    color: white;
+    line-height: 1.1;
+    margin: 0 0 .3rem;
+  }
+
+  /* Rango de edad (ej: "0 – 3 meses") */
+  .boboo-age-card__range {
+    font-family: var(--boboo-font-body, 'DM Sans', sans-serif);
+    font-size: .72rem;
+    color: rgba(255, 255, 255, .65);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    margin: 0 0 .8rem;
+  }
+
+  /* CTA link — aparece en hover */
+  .boboo-age-card__cta {
+    display: inline-block;
+    font-family: var(--boboo-font-body, 'DM Sans', sans-serif);
+    font-size: .7rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--boboo-sand, #D4C4B0);
+    border-bottom: 1px solid rgba(212, 196, 176, .45);
+    padding-bottom: 2px;
+    transition: color .2s ease, border-color .2s ease;
+    /* Oculto en reposo, visible en hover con translate */
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity .25s ease, transform .25s ease, color .2s ease, border-color .2s ease;
+  }
+
+  .boboo-age-card:hover .boboo-age-card__cta {
+    opacity: 1;
+    transform: translateY(0);
+    color: white;
+    border-color: rgba(255, 255, 255, .6);
+  }
+
+  /* ── Shape divider inferior ── */
+  .boboo-ages__divider-bottom {
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    line-height: 0;
+  }
+
+  .boboo-ages__divider-bottom svg {
+    width: 100%;
+    height: 48px;
+    display: block;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .boboo-ages__grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .boboo-ages {
+      padding: 3.5rem 1rem 3rem;
+    }
+
+    .boboo-ages__grid {
+      gap: .7rem;
+    }
+
+    .boboo-age-card__label {
+      font-size: 1.4rem;
+    }
+
+    /* En mobile el CTA siempre visible (sin hover) */
+    .boboo-age-card__cta {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* ── Accesibilidad ── */
+  @media (prefers-reduced-motion: reduce) {
+    .boboo-age-card__img,
+    .boboo-age-card__img--hover,
+    .boboo-age-card__cta,
+    .boboo-age-card__overlay {
+      transition: none !important;
+    }
+
+    .boboo-age-card:hover .boboo-age-card__img:not(.boboo-age-card__img--hover) {
+      transform: none;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Tarjetas por edad",
+  "tag": "section",
+  "class": "boboo-ages-section",
+  "max_blocks": 6,
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Texto eyebrow (sobre el título)",
+      "default": "Para cada etapa"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Título — usa <em>texto</em> para cursiva sage",
+      "default": "¿Cuánto tiene <em>el peque?</em>"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_bottom_divider",
+      "label": "Mostrar separador de curva inferior",
+      "default": true,
+      "info": "Curva decorativa en el borde inferior de la sección."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "age_card",
+      "name": "Tarjeta de edad",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Imagen principal"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_hover",
+          "label": "Imagen en hover (opcional — segundo ángulo)",
+          "info": "Si se selecciona, aparece con un crossfade al pasar el ratón."
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Nombre de la etapa",
+          "default": "Recién Nacido",
+          "info": "Ej: Bebé, Pequeñín, Explorador..."
+        },
+        {
+          "type": "text",
+          "id": "age_range",
+          "label": "Rango de edad",
+          "default": "0 – 3 meses"
+        },
+        {
+          "type": "text",
+          "id": "cta_text",
+          "label": "Texto del enlace",
+          "default": "Ver colección"
+        },
+        {
+          "type": "url",
+          "id": "url",
+          "label": "Enlace a la colección"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Tarjetas por edad BOBOÓ",
+      "blocks": [
+        {
+          "type": "age_card",
+          "settings": {
+            "label": "Recién Nacido",
+            "age_range": "0 – 3 meses",
+            "cta_text": "Ver colección"
+          }
+        },
+        {
+          "type": "age_card",
+          "settings": {
+            "label": "Bebé",
+            "age_range": "3 – 12 meses",
+            "cta_text": "Ver colección"
+          }
+        },
+        {
+          "type": "age_card",
+          "settings": {
+            "label": "Pequeñín",
+            "age_range": "1 – 3 años",
+            "cta_text": "Ver colección"
+          }
+        },
+        {
+          "type": "age_card",
+          "settings": {
+            "label": "Explorador",
+            "age_range": "3 – 7 años",
+            "cta_text": "Ver colección"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

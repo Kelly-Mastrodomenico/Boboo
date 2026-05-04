@@ -1,0 +1,627 @@
+{%- comment -%}
+  BOBOÓ — Sección más vendidos
+  - 8 productos de una colección configurable
+  - Quick-view panel en cada tarjeta (CSS-driven + mínimo JS)
+  - Crossfade imagen front/back en hover (CSS puro)
+  - CTA "Añadir al carrito" slide desde abajo (CSS puro)
+  - Animación de entrada: GSAP stagger (justificado: 8 tarjetas coordinadas)
+{%- endcomment -%}
+
+{%- liquid
+  assign featured_collection = section.settings.collection
+  assign product_limit = section.settings.product_limit | default: 8
+-%}
+
+<section class="boboo-bestsellers" aria-label="{{ section.settings.heading | default: 'Más vendidos' }}">
+  <div class="section-header reveal">
+    <p class="section-tag">{{ section.settings.eyebrow | default: 'Los favoritos' }}</p>
+    <h2 class="section-title">
+      {{ section.settings.heading | default: 'Los favoritos de <em>las familias Boboó</em>' }}
+    </h2>
+  </div>
+
+  <div class="boboo-bestsellers__grid" id="boboo-productos-grid">
+    {%- if featured_collection != blank -%}
+      {%- for product in featured_collection.products limit: product_limit -%}
+        {%- liquid
+          assign first_variant = product.first_available_variant | default: product.variants.first
+          assign product_image = product.featured_image
+          assign product_image_back = product.images[1]
+          assign thirty_days_ago = 'now' | date: '%s' | plus: 0 | minus: 2592000
+          assign product_created_ts = product.created_at | date: '%s' | plus: 0
+        -%}
+
+        <article
+          class="boboo-product-card"
+          aria-label="{{ product.title }}"
+          data-product-id="{{ product.id }}"
+        >
+          {%- comment -%} Thumbnail con crossfade y CTA ─────────────── {%- endcomment -%}
+          <div class="boboo-product-card__thumb" aria-hidden="true">
+            {%- comment -%} Badges ─────────── {%- endcomment -%}
+            <div class="boboo-product-card__badges">
+              {%- if product.available == false -%}
+                <span class="badge badge--sage">Agotado</span>
+              {%- elsif product.compare_at_price > product.price -%}
+                <span class="badge badge--sale">Oferta</span>
+              {%- elsif product_created_ts > thirty_days_ago -%}
+                <span class="badge badge--new">Nuevo</span>
+              {%- endif -%}
+            </div>
+
+            {%- comment -%} Wishlist ─────────── {%- endcomment -%}
+            <button
+              class="boboo-product-card__wish"
+              aria-label="Guardar {{ product.title }} en lista de deseos"
+              data-product-id="{{ product.id }}"
+            >
+              ♡
+            </button>
+
+            {%- comment -%} Imagen principal (front) ─────────── {%- endcomment -%}
+            {%- if product_image != blank -%}
+              <img
+                class="boboo-product-card__img boboo-product-card__img--front"
+                src="{{ product_image | image_url: width: 500 }}"
+                srcset="
+                  {{ product_image | image_url: width: 300 }} 300w,
+                  {{ product_image | image_url: width: 500 }} 500w,
+                  {{ product_image | image_url: width: 700 }} 700w
+                "
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                alt="{{ product_image.alt | default: product.title }}"
+                width="{{ product_image.width }}"
+                height="{{ product_image.height }}"
+                loading="lazy"
+              >
+            {%- endif -%}
+
+            {%- comment -%} Imagen secundaria (back) — crossfade en hover ─────────── {%- endcomment -%}
+            {%- if product_image_back != blank -%}
+              <img
+                class="boboo-product-card__img boboo-product-card__img--back"
+                src="{{ product_image_back | image_url: width: 500 }}"
+                srcset="
+                  {{ product_image_back | image_url: width: 300 }} 300w,
+                  {{ product_image_back | image_url: width: 500 }} 500w
+                "
+                sizes="(max-width: 640px) 50vw, 25vw"
+                alt="{{ product_image_back.alt | default: product.title }}"
+                width="{{ product_image_back.width }}"
+                height="{{ product_image_back.height }}"
+                loading="lazy"
+                aria-hidden="true"
+              >
+            {%- endif -%}
+
+            {%- comment -%} CTA slide desde abajo — CSS puro ─────────── {%- endcomment -%}
+            {%- if product.available -%}
+              <button
+                class="boboo-product-card__add-hover"
+                data-product-id="{{ product.id }}"
+                data-variant-id="{{ first_variant.id }}"
+                aria-label="Añadir {{ product.title }} al carrito"
+              >
+                Añadir al carrito
+              </button>
+            {%- else -%}
+              <span class="boboo-product-card__add-hover boboo-product-card__add-hover--soldout">
+                Agotado
+              </span>
+            {%- endif -%}
+
+            {%- comment -%}
+              QUICK-VIEW PANEL
+              Datos via data attributes → JS los usa para el formulario
+              CSS gestiona visibilidad via .boboo-product-card:hover
+            {%- endcomment -%}
+            <div
+              class="boboo-quick-view"
+              data-default-variant="{{ first_variant.id }}"
+              role="dialog"
+              aria-label="Vista rápida de {{ product.title }}"
+              aria-hidden="true"
+            >
+              <p class="boboo-quick-view__title">{{ product.title }}</p>
+              <p class="boboo-quick-view__price">
+                {{ product.price | money }}
+                {%- if product.compare_at_price > product.price -%}
+                  <span class="boboo-quick-view__price-old">{{ product.compare_at_price | money }}</span>
+                {%- endif -%}
+              </p>
+
+              {%- comment -%} Selector de tallas ─────────── {%- endcomment -%}
+              <div class="boboo-quick-view__sizes" role="group" aria-label="Selecciona talla">
+                {%- for variant in product.variants -%}
+                  <button
+                    class="boboo-quick-view__size {% if forloop.first %}active{% endif %}"
+                    data-variant-id="{{ variant.id }}"
+                    aria-label="{{ variant.title }}"
+                    {% unless variant.available %} disabled aria-disabled="true"{% endunless %}
+                  >
+                    {{ variant.title }}
+                  </button>
+                {%- endfor -%}
+              </div>
+
+              <button
+                class="boboo-quick-view__add"
+                data-variant-id="{{ first_variant.id }}"
+                aria-label="Añadir al carrito"
+              >
+                Añadir al carrito
+              </button>
+
+              <a
+                href="{{ product.url }}"
+                class="boboo-quick-view__link"
+              >
+                Ver producto completo →
+              </a>
+            </div>
+          </div>
+
+          {%- comment -%} Info del producto ─────────────────────── {%- endcomment -%}
+          <div class="boboo-product-card__info">
+            <p class="boboo-product-card__cat">
+              {{- product.type | default: product.collections.first.title -}}
+            </p>
+
+            <a
+              href="{{ product.url }}"
+              class="boboo-product-card__name"
+              aria-label="Ver {{ product.title }}"
+            >
+              {{ product.title }}
+            </a>
+
+            {%- comment -%} Rating placeholder — se rellena via Judge.me app {%- endcomment -%}
+            <div class="boboo-product-card__rating" aria-label="Valoraciones">
+              <span class="boboo-product-card__stars" aria-hidden="true">★★★★★</span>
+              <span class="boboo-product-card__rating-count">({{ product.metafields.reviews.rating_count | default: 0 }})</span>
+            </div>
+
+            <div class="boboo-product-card__price">
+              <span class="boboo-product-card__price-current">{{ product.price | money }}</span>
+              {%- if product.compare_at_price > product.price -%}
+                <span class="boboo-product-card__price-original">{{ product.compare_at_price | money }}</span>
+              {%- endif -%}
+            </div>
+
+            {%- comment -%} Tallas disponibles como dots ─────────── {%- endcomment -%}
+            <div class="boboo-product-card__sizes" aria-label="Tallas disponibles">
+              {%- for variant in product.variants limit: 5 -%}
+                <span
+                  class="boboo-product-card__size-dot {% unless variant.available %}boboo-product-card__size-dot--soldout{% endunless %}"
+                  title="{{ variant.title }}"
+                >
+                  {{ variant.title | split: ' ' | first }}
+                </span>
+              {%- endfor -%}
+            </div>
+          </div>
+        </article>
+      {%- endfor -%}
+    {%- else -%}
+      {%- comment -%} Estado vacío para el editor de Shopify {%- endcomment -%}
+      <p style="text-align:center;color:var(--boboo-muted);padding:3rem;">
+        Selecciona una colección en las opciones de la sección.
+      </p>
+    {%- endif -%}
+  </div>
+
+  <div class="boboo-bestsellers__footer reveal">
+    <a href="{{ section.settings.cta_url | default: '/collections/all' }}" class="btn-secondary">
+      {{ section.settings.cta_label | default: 'Ver todos los favoritos →' }}
+    </a>
+  </div>
+</section>
+
+<style>
+  /* ── Header de la sección — centrado y con tipografía Boboó ── */
+  .boboo-bestsellers .section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    max-width: 1280px;
+    margin-inline: auto;
+    padding-inline: 2rem;
+  }
+
+  .boboo-bestsellers .section-tag {
+    display: block;
+    font-family: var(--boboo-font-body, 'DM Sans', sans-serif);
+    font-size: .72rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--boboo-terracota, #C17E5A);
+    font-weight: 500;
+    margin: 0 0 1rem;
+  }
+
+  .boboo-bestsellers .section-title {
+    font-family: var(--boboo-font-display, 'Cormorant Garamond', Georgia, serif);
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 300;
+    line-height: 1.1;
+    color: var(--boboo-carbon, #2A2520);
+    margin: 0;
+  }
+
+  .boboo-bestsellers .section-title em {
+    font-style: italic;
+    color: var(--boboo-sage-dk, #5C8068);
+  }
+
+  /* ── Layout general ── */
+  .boboo-bestsellers {
+    padding: 5rem var(--boboo-gutter);
+    background: var(--boboo-cream);
+  }
+
+  .boboo-bestsellers__grid {
+    max-width: var(--boboo-max-width);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  /* ── Tarjeta de producto ── */
+  /* Animación de entrada — IO añade .visible (como .boboo-reveal) */
+  .boboo-product-card {
+    opacity: 0;
+    transform: translateY(32px);
+    transition:
+      opacity .55s ease,
+      transform .55s var(--boboo-ease, cubic-bezier(.25,.46,.45,.94));
+  }
+
+  .boboo-product-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Stagger CSS — delay escalonado para las primeras 8 tarjetas */
+  .boboo-product-card:nth-child(1) { transition-delay: .05s; }
+  .boboo-product-card:nth-child(2) { transition-delay: .10s; }
+  .boboo-product-card:nth-child(3) { transition-delay: .15s; }
+  .boboo-product-card:nth-child(4) { transition-delay: .20s; }
+  .boboo-product-card:nth-child(5) { transition-delay: .25s; }
+  .boboo-product-card:nth-child(6) { transition-delay: .30s; }
+  .boboo-product-card:nth-child(7) { transition-delay: .35s; }
+  .boboo-product-card:nth-child(8) { transition-delay: .40s; }
+
+  /* En el editor de Shopify siempre visible */
+  .shopify-design-mode .boboo-product-card {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .boboo-product-card {
+    cursor: pointer;
+    position: relative; /* Necesario para el quick-view absolute */
+  }
+
+  .boboo-product-card__thumb {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--boboo-radius-md);
+    aspect-ratio: 3 / 4;
+    background: var(--boboo-warm);
+    margin-bottom: 1rem;
+  }
+
+  /* Crossfade entre imagen front y back — CSS puro */
+  .boboo-product-card__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    position: absolute;
+    inset: 0;
+    transition: opacity .4s ease;
+  }
+
+  .boboo-product-card__img--back {
+    opacity: 0;
+  }
+
+  .boboo-product-card:hover .boboo-product-card__img--front {
+    opacity: 0;
+  }
+
+  .boboo-product-card:hover .boboo-product-card__img--back {
+    opacity: 1;
+  }
+
+  /* Badges */
+  .boboo-product-card__badges {
+    position: absolute;
+    top: .8rem;
+    left: .8rem;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+  }
+
+  /* Wishlist */
+  .boboo-product-card__wish {
+    position: absolute;
+    top: .7rem;
+    right: .7rem;
+    z-index: 2;
+    width: 32px;
+    height: 32px;
+    background: rgba(253, 250, 246, .85);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity var(--boboo-t-fast);
+    cursor: pointer;
+    font-size: 1rem;
+    border: none;
+    color: var(--boboo-carbon);
+  }
+
+  .boboo-product-card:hover .boboo-product-card__wish {
+    opacity: 1;
+  }
+
+  /* CTA slide desde abajo — CSS puro */
+  .boboo-product-card__add-hover {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--boboo-carbon);
+    color: var(--boboo-white);
+    padding: .8rem;
+    font-size: .75rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    text-align: center;
+    transform: translateY(100%);
+    transition: transform .25s ease;
+    z-index: 3;
+    border: none;
+    cursor: pointer;
+    font-family: var(--boboo-font-body);
+  }
+
+  .boboo-product-card__add-hover--soldout {
+    background: var(--boboo-muted);
+    cursor: default;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .boboo-product-card:hover .boboo-product-card__add-hover {
+    transform: translateY(0);
+  }
+
+  /* ── Info de la tarjeta ── */
+  .boboo-product-card__cat {
+    font-size: .7rem;
+    color: var(--boboo-muted);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-bottom: .3rem;
+  }
+
+  .boboo-product-card__name {
+    font-family: var(--boboo-font-display);
+    font-size: 1.05rem;
+    font-weight: 400;
+    color: var(--boboo-carbon);
+    text-decoration: none;
+    display: block;
+    margin-bottom: .4rem;
+    line-height: 1.3;
+    transition: color var(--boboo-t-fast);
+  }
+
+  .boboo-product-card__name:hover {
+    color: var(--boboo-terracota);
+  }
+
+  .boboo-product-card__rating {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    margin-bottom: .4rem;
+  }
+
+  .boboo-product-card__stars {
+    color: var(--boboo-terracota);
+    font-size: .75rem;
+    letter-spacing: 1px;
+  }
+
+  .boboo-product-card__rating-count {
+    font-size: .72rem;
+    color: var(--boboo-muted);
+  }
+
+  .boboo-product-card__price {
+    display: flex;
+    align-items: baseline;
+    gap: .5rem;
+    margin-bottom: .5rem;
+  }
+
+  .boboo-product-card__price-current {
+    font-size: .95rem;
+    font-weight: 500;
+    color: var(--boboo-carbon);
+  }
+
+  .boboo-product-card__price-original {
+    font-size: .85rem;
+    color: var(--boboo-muted);
+    text-decoration: line-through;
+  }
+
+  /* Dots de tallas disponibles */
+  .boboo-product-card__sizes {
+    display: flex;
+    gap: .3rem;
+    flex-wrap: wrap;
+  }
+
+  .boboo-product-card__size-dot {
+    min-width: 28px;
+    height: 18px;
+    padding: 0 .3rem;
+    border: 1px solid var(--boboo-sand);
+    border-radius: 2px;
+    font-size: .6rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--boboo-muted);
+  }
+
+  .boboo-product-card__size-dot--soldout {
+    opacity: .4;
+    text-decoration: line-through;
+  }
+
+  /* ── Footer de la sección ── */
+  .boboo-bestsellers__footer {
+    text-align: center;
+    margin-top: 1rem;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 1024px) {
+    .boboo-bestsellers__grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .boboo-bestsellers__grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+
+    /* Ocultar quick-view en mobile */
+    .boboo-quick-view {
+      display: none !important;
+    }
+  }
+</style>
+
+<script>
+(function () {
+  /* ── Animación de entrada con IntersectionObserver (sin GSAP) ──
+     CSS gestiona la transición; IO alterna la clase .visible */
+  if (window.self === window.top) {
+    var cards = document.querySelectorAll('#boboo-productos-grid .boboo-product-card');
+    if (cards.length && 'IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) {
+            e.target.classList.add('visible');
+            io.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.1 });
+      cards.forEach(function (c) { io.observe(c); });
+    }
+  }
+
+  /* ── Añadir al carrito desde la tarjeta (fetch vanilla) ── */
+  document.querySelectorAll(
+    '.boboo-product-card__add-hover:not(.boboo-product-card__add-hover--soldout)'
+  ).forEach(function (btn) {
+    btn.addEventListener('click', async function (e) {
+      e.preventDefault();
+      var variantId = this.dataset.variantId;
+      if (!variantId) return;
+
+      try {
+        var res = await fetch('/cart/add.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: variantId, quantity: 1 })
+        });
+
+        if (res.ok) {
+          /* Refrescar el drawer/contador del carrito de Horizon */
+          document.dispatchEvent(new CustomEvent('cart:updated'));
+          /* Feedback visual en el botón */
+          var orig = this.textContent;
+          this.textContent = '✓ Añadido';
+          this.style.background = 'var(--boboo-sage-dk)';
+          setTimeout(function () {
+            btn.textContent = orig;
+            btn.style.background = '';
+          }, 1800);
+        }
+      } catch (err) {
+        /* Error silencioso */
+      }
+    });
+  });
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Más vendidos",
+  "tag": "section",
+  "class": "boboo-bestsellers-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Texto eyebrow",
+      "default": "Los favoritos"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Título de la sección",
+      "default": "Los favoritos de <em>las familias Boboó</em>",
+      "info": "Usa <em>texto</em> para cursiva en verde sage."
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Colección a mostrar"
+    },
+    {
+      "type": "range",
+      "id": "product_limit",
+      "label": "Número de productos",
+      "min": 4,
+      "max": 12,
+      "step": 4,
+      "default": 8
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Texto del botón",
+      "default": "Ver toda la colección →"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "URL del botón"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Más vendidos BOBOÓ"
+    }
+  ]
+}
+{% endschema %}

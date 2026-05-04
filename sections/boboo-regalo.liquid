@@ -1,0 +1,566 @@
+{%- comment -%}
+  BOBOÓ — Sección "El regalo perfecto"
+  Sesión 3 — Sección custom (sobrevive actualizaciones del tema)
+
+  DISEÑO:
+  · Split 60/40: imagen izquierda + contenido derecho (se invierte en mobile)
+  · Imagen: aspect-ratio 4/5, tilt 3D hover, label blush superpuesta
+  · Contenido: cita italizada terracota + título Cormorant + cuerpo + 4 feature cards
+  · Feature cards: grid 2×2, borde sand, hover terracota
+  · CTA: botón primario con efecto ola
+  · Shape divider curva en la parte superior (viene de la sección age-cards blanca)
+  · Animaciones entrada: CSS translateX izquierda/derecha + boboo-reveal
+  · Sin GSAP — CSS transition-delay escalonado para las cards
+
+  SCHEMA:
+  · image_picker para la imagen
+  · Campos de texto: cita, título, cuerpo, CTA
+  · Hasta 4 bloques "feature" (emoji + título + descripción + URL opcional)
+{%- endcomment -%}
+
+{%- liquid
+  assign img          = section.settings.image
+  assign quote        = section.settings.quote
+  assign heading      = section.settings.heading      | default: '¿Buscas el regalo perfecto?'
+  assign body         = section.settings.body
+  assign img_label    = section.settings.image_label  | default: 'Conjuntos especiales'
+  assign cta_label    = section.settings.cta_label    | default: 'Ver todos los conjuntos'
+  assign cta_url      = section.settings.cta_url      | default: '/collections/all'
+  assign layout       = section.settings.layout       | default: 'img_left'
+-%}
+
+<section class="boboo-regalo boboo-regalo--{{ layout }}" aria-label="Regalos BOBOÓ">
+
+  {%- comment -%}
+    Shape divider curva en la parte superior.
+    Fill: --boboo-white (mismo color que age-cards) para que la curva sea invisible
+    y solo se vea el corte entre el blanco de arriba y el cream de esta sección.
+  {%- endcomment -%}
+  {%- if section.settings.show_top_divider -%}
+    <div class="boboo-regalo__divider-top" aria-hidden="true">
+      <svg viewBox="0 0 1440 48" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0,48 L0,24 Q360,0 720,24 Q1080,48 1440,24 L1440,48 Z" fill="var(--boboo-white, #FDFAF6)"/>
+      </svg>
+    </div>
+  {%- endif -%}
+
+  <div class="boboo-regalo__inner">
+
+    {%- comment -%} ── Columna imagen ── {%- endcomment -%}
+    <div class="boboo-regalo__img-col boboo-reveal">
+      <div class="boboo-regalo__img-wrap tilt-card">
+        {%- if img != blank -%}
+          <img
+            class="boboo-regalo__img"
+            src="{{ img | image_url: width: 700 }}"
+            srcset="
+              {{ img | image_url: width: 400 }} 400w,
+              {{ img | image_url: width: 700 }} 700w,
+              {{ img | image_url: width: 900 }} 900w
+            "
+            sizes="(max-width: 900px) 100vw, 45vw"
+            alt="{{ img.alt | default: 'Ropa infantil artesanal BOBOÓ — regalo perfecto' | escape }}"
+            width="{{ img.width }}"
+            height="{{ img.height }}"
+            loading="lazy"
+          >
+        {%- else -%}
+          <div class="boboo-regalo__placeholder" aria-hidden="true"></div>
+        {%- endif -%}
+
+        {%- comment -%} Etiqueta superpuesta sobre la imagen {%- endcomment -%}
+        <span class="boboo-regalo__img-label">{{ img_label }}</span>
+      </div>
+    </div>
+
+    {%- comment -%} ── Columna contenido ── {%- endcomment -%}
+    <div class="boboo-regalo__content boboo-reveal boboo-reveal--delay-2">
+
+      {%- comment -%} Cita en cursiva terracota {%- endcomment -%}
+      {%- if quote != blank -%}
+        <p class="boboo-regalo__quote">&ldquo;{{ quote }}&rdquo;</p>
+      {%- endif -%}
+
+      {%- comment -%} Título principal {%- endcomment -%}
+      <h2 class="boboo-regalo__title">{{ heading }}</h2>
+
+      {%- comment -%} Cuerpo de texto {%- endcomment -%}
+      {%- if body != blank -%}
+        <div class="boboo-regalo__body">{{ body }}</div>
+      {%- endif -%}
+
+      {%- comment -%}
+        Feature cards — grid 2×2
+        Cada bloque es configurable: emoji, título, descripción, URL opcional.
+        Las animaciones de entrada están escalonadas con CSS transition-delay.
+      {%- endcomment -%}
+      {%- if section.blocks.size > 0 -%}
+        <div class="boboo-regalo__cards">
+          {%- for block in section.blocks -%}
+            {%- if block.settings.url != blank -%}
+              <a
+                href="{{ block.settings.url }}"
+                class="boboo-regalo__card boboo-regalo__card--link boboo-reveal boboo-reveal--delay-{{ forloop.index }}"
+                {{ block.shopify_attributes }}
+              >
+            {%- else -%}
+              <div
+                class="boboo-regalo__card boboo-reveal boboo-reveal--delay-{{ forloop.index }}"
+                {{ block.shopify_attributes }}
+              >
+            {%- endif -%}
+
+              <span class="boboo-regalo__card-icon" aria-hidden="true">{{ block.settings.icon | default: '✦' }}</span>
+              <div class="boboo-regalo__card-text">
+                <strong>{{ block.settings.title | default: 'Característica' }}</strong>
+                {%- if block.settings.description != blank -%}
+                  <span>{{ block.settings.description }}</span>
+                {%- endif -%}
+              </div>
+
+            {%- if block.settings.url != blank -%}
+              </a>
+            {%- else -%}
+              </div>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+      {%- comment -%} CTA botón primario {%- endcomment -%}
+      <a href="{{ cta_url }}" class="boboo-regalo__cta">
+        {{ cta_label }}
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<style>
+  /* ────────────────────────────────────────────────────
+     BOBOÓ REGALO — Estilos embebidos en la sección
+     Sesión 3
+  ──────────────────────────────────────────────────── */
+
+  .boboo-regalo {
+    background: var(--boboo-cream, #F5EFE6);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Shape divider superior */
+  .boboo-regalo__divider-top {
+    line-height: 0;
+    margin-bottom: -1px;
+  }
+  .boboo-regalo__divider-top svg {
+    width: 100%;
+    height: 48px;
+    display: block;
+  }
+
+  /* ── Layout interior ── */
+  .boboo-regalo__inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 5rem;
+    align-items: center;
+    padding: 5rem 2rem;
+  }
+
+  /* Variante imagen a la derecha */
+  .boboo-regalo--img_right .boboo-regalo__inner {
+    grid-template-columns: 1fr 1.15fr;
+  }
+  .boboo-regalo--img_right .boboo-regalo__img-col {
+    order: 2;
+  }
+  .boboo-regalo--img_right .boboo-regalo__content {
+    order: 1;
+  }
+
+  /* ── Columna imagen ── */
+  .boboo-regalo__img-wrap {
+    position: relative;
+    border-radius: 4px;
+    overflow: hidden;
+    aspect-ratio: 4 / 5;
+    /* Preparar para tilt 3D del boboo-main.js */
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+
+  .boboo-regalo__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: brightness(.96);
+    transition: transform .6s cubic-bezier(.25, .46, .45, .94);
+  }
+
+  .boboo-regalo__img-wrap:hover .boboo-regalo__img {
+    transform: scale(1.03);
+  }
+
+  /* Placeholder cuando no hay imagen */
+  .boboo-regalo__placeholder {
+    width: 100%;
+    height: 100%;
+    min-height: 400px;
+    background: linear-gradient(135deg, var(--boboo-warm, #EDE3D8) 0%, var(--boboo-blush, #EDD5C8) 100%);
+  }
+
+  /* Etiqueta superpuesta */
+  .boboo-regalo__img-label {
+    position: absolute;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    background: var(--boboo-blush, #EDD5C8);
+    padding: .6rem 1.1rem;
+    border-radius: 2px;
+    font-family: var(--boboo-font-body, 'DM Sans', sans-serif);
+    font-size: .72rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--boboo-carbon, #2A2520);
+    font-weight: 500;
+  }
+
+  /* ── Contenido ── */
+
+  /* Cita italizada en terracota */
+  .boboo-regalo__quote {
+    font-family: var(--boboo-font-display, 'Cormorant Garamond', Georgia, serif);
+    font-size: 1rem;
+    font-style: italic;
+    color: var(--boboo-terracota, #C17E5A);
+    line-height: 1.65;
+    letter-spacing: .03em;
+    margin: 0 0 1.8rem;
+  }
+
+  /* Título */
+  .boboo-regalo__title {
+    font-family: var(--boboo-font-display, 'Cormorant Garamond', Georgia, serif);
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    font-weight: 300;
+    line-height: 1.12;
+    color: var(--boboo-carbon, #2A2520);
+    margin: 0 0 1.2rem;
+  }
+
+  .boboo-regalo__title em {
+    font-style: italic;
+    color: var(--boboo-sage-dk, #5C8068);
+  }
+
+  /* Cuerpo de texto */
+  .boboo-regalo__body {
+    font-family: var(--boboo-font-body, 'DM Sans', sans-serif);
+    font-size: .9rem;
+    color: var(--boboo-muted, #8A7E74);
+    line-height: 1.9;
+    font-weight: 300;
+    margin: 0 0 2.2rem;
+  }
+
+  .boboo-regalo__body p { margin: 0; }
+
+  /* ── Feature cards 2×2 ── */
+  .boboo-regalo__cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .8rem;
+    margin: 0 0 2.5rem;
+  }
+
+  .boboo-regalo__card {
+    border: 1px solid var(--boboo-warm, #EDE3D8);
+    border-radius: 4px;
+    padding: 1.1rem;
+    color: var(--boboo-carbon, #2A2520);
+    transition: border-color .2s ease, background .2s ease;
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+    background: rgba(253, 250, 246, .6);
+  }
+
+  /* Solo las cards con URL tienen cursor pointer y efecto hover */
+  .boboo-regalo__card--link {
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .boboo-regalo__card--link:hover {
+    border-color: var(--boboo-terracota, #C17E5A);
+    background: var(--boboo-white, #FDFAF6);
+  }
+
+  .boboo-regalo__card-icon {
+    font-size: 1.4rem;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+
+  .boboo-regalo__card-text strong {
+    display: block;
+    font-family: var(--boboo-font-body, 'DM Sans', sans-serif);
+    font-size: .82rem;
+    font-weight: 500;
+    margin-bottom: .15rem;
+    color: var(--boboo-carbon, #2A2520);
+  }
+
+  .boboo-regalo__card-text span {
+    font-family: var(--boboo-font-body, 'DM Sans', sans-serif);
+    font-size: .72rem;
+    color: var(--boboo-muted, #8A7E74);
+    line-height: 1.4;
+  }
+
+  /* ── CTA ── */
+  .boboo-regalo__cta {
+    display: inline-block;
+    background: var(--boboo-carbon, #2A2520);
+    color: var(--boboo-white, #FDFAF6);
+    padding: 1rem 2.2rem;
+    font-family: var(--boboo-font-body, 'DM Sans', sans-serif);
+    font-size: .78rem;
+    font-weight: 500;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    transition: color .2s ease;
+  }
+
+  /* Ola terracota en hover */
+  .boboo-regalo__cta::before {
+    content: '';
+    position: absolute;
+    left: 50%; top: 100%;
+    width: 140%; height: 180%;
+    background: rgba(0,0,0,.05);
+    border-radius: 50%;
+    transform: translateX(-50%) scaleY(1) scaleX(1.25);
+    transition: all .5s .1s cubic-bezier(.55,0,.1,1);
+    z-index: -1;
+  }
+  .boboo-regalo__cta::after {
+    content: '';
+    position: absolute;
+    left: 55%; top: 180%;
+    width: 160%; height: 190%;
+    background: var(--boboo-terracota, #C17E5A);
+    border-radius: 50%;
+    transform: translateX(-50%) scaleY(1) scaleX(1.45);
+    transition: all .5s .1s cubic-bezier(.55,0,.1,1);
+    z-index: -1;
+  }
+  .boboo-regalo__cta:hover { color: var(--boboo-white, #FDFAF6); }
+  .boboo-regalo__cta:hover::before {
+    top: -35%;
+    background: var(--boboo-terracota, #C17E5A);
+    transform: translateX(-50%) scaleY(1.3) scaleX(0.8);
+  }
+  .boboo-regalo__cta:hover::after {
+    top: -45%;
+    background: var(--boboo-terracota, #C17E5A);
+    transform: translateX(-50%) scaleY(1.3) scaleX(0.8);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .boboo-regalo__inner,
+    .boboo-regalo--img_right .boboo-regalo__inner {
+      grid-template-columns: 1fr;
+      gap: 2.5rem;
+      padding: 3.5rem 1.5rem;
+    }
+
+    .boboo-regalo--img_right .boboo-regalo__img-col,
+    .boboo-regalo--img_right .boboo-regalo__content {
+      order: unset;
+    }
+
+    .boboo-regalo__img-col {
+      max-width: 420px;
+      margin: 0 auto;
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 540px) {
+    .boboo-regalo__cards {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* ── Accesibilidad ── */
+  @media (prefers-reduced-motion: reduce) {
+    .boboo-regalo__img { transition: none !important; }
+    .boboo-regalo__cta::before,
+    .boboo-regalo__cta::after { transition: none !important; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Sección regalo",
+  "tag": "section",
+  "class": "boboo-regalo-section",
+  "max_blocks": 4,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Imagen"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Imagen de la sección"
+    },
+    {
+      "type": "text",
+      "id": "image_label",
+      "label": "Etiqueta sobre la imagen",
+      "default": "Conjuntos especiales",
+      "info": "Pequeña etiqueta blush superpuesta en la esquina inferior de la imagen."
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Posición de la imagen",
+      "options": [
+        { "value": "img_left",  "label": "Imagen a la izquierda" },
+        { "value": "img_right", "label": "Imagen a la derecha" }
+      ],
+      "default": "img_left"
+    },
+    {
+      "type": "header",
+      "content": "Textos"
+    },
+    {
+      "type": "text",
+      "id": "quote",
+      "label": "Cita italizada (opcional)",
+      "default": "Un día tan especial necesita que no falte ni un detalle"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Título de la sección",
+      "default": "¿Buscas el regalo perfecto?"
+    },
+    {
+      "type": "richtext",
+      "id": "body",
+      "label": "Texto descriptivo",
+      "default": "<p>No siempre se sabe la talla exacta. Por eso hemos creado conjuntos ya pensados y packs de regalo para que acertar sea fácil. Ropa que la madre va a adorar y que el bebé va a llevar con orgullo.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Botón"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Texto del botón",
+      "default": "Ver todos los conjuntos"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "Enlace del botón"
+    },
+    {
+      "type": "header",
+      "content": "Separador decorativo"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_top_divider",
+      "label": "Mostrar curva decorativa superior",
+      "default": true,
+      "info": "Curva que separa visualmente esta sección de la anterior."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "feature",
+      "name": "Tarjeta de característica",
+      "settings": [
+        {
+          "type": "text",
+          "id": "icon",
+          "label": "Emoji o símbolo",
+          "default": "🎁"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Título de la tarjeta",
+          "default": "Conjuntos Boboó"
+        },
+        {
+          "type": "text",
+          "id": "description",
+          "label": "Descripción corta",
+          "default": "Ranita + cubrepañal a juego"
+        },
+        {
+          "type": "url",
+          "id": "url",
+          "label": "Enlace (opcional — si se añade la tarjeta es clickable)"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Sección regalo BOBOÓ",
+      "blocks": [
+        {
+          "type": "feature",
+          "settings": {
+            "icon": "🎁",
+            "title": "Conjuntos Boboó",
+            "description": "Ranita + cubrepañal a juego"
+          }
+        },
+        {
+          "type": "feature",
+          "settings": {
+            "icon": "🎂",
+            "title": "Cumpleaños",
+            "description": "Coronas y sets especiales"
+          }
+        },
+        {
+          "type": "feature",
+          "settings": {
+            "icon": "👶",
+            "title": "Primera Puesta",
+            "description": "Para recién nacidos"
+          }
+        },
+        {
+          "type": "feature",
+          "settings": {
+            "icon": "🎀",
+            "title": "Tarjeta Regalo",
+            "description": "Si no sabes la talla"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

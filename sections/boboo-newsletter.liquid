@@ -1,0 +1,311 @@
+{%- comment -%}
+  BOBOÓ — Newsletter con confetti
+  - Formulario de suscripción integrado con Shopify Email / Klaviyo
+  - canvas-confetti: dynamic import on-demand al hacer submit (no en carga de página)
+  - Validación inline CSS + JS mínimo
+{%- endcomment -%}
+
+<section class="boboo-newsletter" aria-label="Suscripción al boletín">
+  <div class="boboo-newsletter__inner">
+    <p class="boboo-newsletter__eyebrow" aria-hidden="true">✦</p>
+
+    <h2 class="boboo-newsletter__title">
+      {{ section.settings.heading | default: 'Un 10% de regalo<br><em>en tu primera compra</em>' }}
+    </h2>
+
+    <p class="boboo-newsletter__subtitle">
+      {{ section.settings.subheading | default: 'Suscríbete y recibe descuentos exclusivos, novedades y mucho amor.' }}
+    </p>
+
+    {%- comment -%}
+      Formulario nativo de Shopify para customer email capture.
+      Se puede conectar a Shopify Email o Klaviyo via el Admin.
+    {%- endcomment -%}
+    <form
+      class="boboo-newsletter__form"
+      id="newsletterForm"
+      action="/contact#contact_form"
+      method="post"
+      novalidate
+    >
+      <input type="hidden" name="form_type" value="customer">
+      <input type="hidden" name="utf8" value="✓">
+      <input type="hidden" name="contact[tags]" value="newsletter">
+
+      <label for="newsletterEmail" class="visually-hidden">
+        Tu correo electrónico
+      </label>
+      <input
+        type="email"
+        id="newsletterEmail"
+        name="contact[email]"
+        class="boboo-newsletter__input"
+        placeholder="{{ section.settings.placeholder | default: 'tu@correo.es' }}"
+        required
+        autocomplete="email"
+        aria-required="true"
+      >
+
+      <button
+        type="submit"
+        class="boboo-newsletter__btn"
+        id="newsletterBtn"
+        aria-label="Suscribirme al boletín"
+      >
+        {{ section.settings.button_label | default: 'Quiero mi 10% →' }}
+      </button>
+    </form>
+
+    <p class="boboo-newsletter__note">
+      {{ section.settings.note | default: 'Sin spam. Puedes cancelar en cualquier momento.' }}
+    </p>
+
+    {%- comment -%} Mensaje de éxito (oculto, se muestra tras submit) {%- endcomment -%}
+    <p class="boboo-newsletter__success" id="newsletterSuccess" aria-live="polite" hidden>
+      {{ section.settings.success_message | default: '🎉 ¡Genial! Ya tienes tu 10% en el correo.' }}
+    </p>
+  </div>
+</section>
+
+<style>
+  .boboo-newsletter {
+    padding: 6rem var(--boboo-gutter);
+    background: var(--boboo-sage);
+    text-align: center;
+  }
+
+  .boboo-newsletter__inner {
+    max-width: 560px;
+    margin: 0 auto;
+  }
+
+  .boboo-newsletter__eyebrow {
+    font-size: 1.4rem;
+    color: rgba(255, 255, 255, .5);
+    margin-bottom: 1.5rem;
+  }
+
+  .boboo-newsletter__title {
+    font-family: var(--boboo-font-display);
+    font-size: clamp(2rem, 5vw, 2.8rem);
+    font-weight: 300;
+    color: white;
+    line-height: 1.1;
+    margin-bottom: 1rem;
+  }
+
+  .boboo-newsletter__title em {
+    color: rgba(255, 255, 255, .85);
+    font-style: italic;
+  }
+
+  .boboo-newsletter__subtitle {
+    font-size: .88rem;
+    color: rgba(255, 255, 255, .75);
+    line-height: 1.8;
+    margin-bottom: 2rem;
+    font-weight: 300;
+  }
+
+  /* Formulario inline */
+  .boboo-newsletter__form {
+    display: flex;
+    gap: 0;
+    border-radius: 2px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(42, 37, 32, .15);
+  }
+
+  .boboo-newsletter__input {
+    flex: 1;
+    padding: 1rem 1.2rem;
+    border: none;
+    outline: none;
+    font-family: var(--boboo-font-body);
+    font-size: .88rem;
+    background: white;
+    color: var(--boboo-carbon);
+    min-width: 0; /* Evita overflow en flex */
+  }
+
+  .boboo-newsletter__input::placeholder {
+    color: var(--boboo-muted);
+  }
+
+  .boboo-newsletter__input:focus {
+    box-shadow: inset 0 0 0 2px var(--boboo-sage-dk);
+  }
+
+  .boboo-newsletter__btn {
+    padding: 1rem 1.5rem;
+    background: var(--boboo-carbon);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-family: var(--boboo-font-body);
+    font-size: .75rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transition: background var(--boboo-transition-fast);
+  }
+
+  .boboo-newsletter__btn:hover {
+    background: var(--boboo-terracota);
+  }
+
+  .boboo-newsletter__btn:disabled {
+    opacity: .6;
+    cursor: default;
+  }
+
+  .boboo-newsletter__note {
+    font-size: .72rem;
+    color: rgba(255, 255, 255, .55);
+    margin-top: .8rem;
+  }
+
+  .boboo-newsletter__success {
+    font-size: .95rem;
+    color: white;
+    margin-top: 1.5rem;
+    font-weight: 500;
+    animation: bobooHeroFade .4s ease both;
+  }
+
+  /* Utility — ocultar visualmente pero mantener accesible */
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @media (max-width: 480px) {
+    .boboo-newsletter__form {
+      flex-direction: column;
+    }
+
+    .boboo-newsletter__btn {
+      padding: .9rem;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    const form = document.getElementById('newsletterForm');
+    const btn = document.getElementById('newsletterBtn');
+    const success = document.getElementById('newsletterSuccess');
+    if (!form) return;
+
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const email = form.querySelector('input[type="email"]').value.trim();
+
+      /* Validación básica */
+      if (!email || !email.includes('@')) {
+        form.querySelector('input[type="email"]').classList.add('error');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Enviando...';
+
+      try {
+        /* Envío via fetch al endpoint de Shopify */
+        const formData = new FormData(form);
+        const res = await fetch(form.action, {
+          method: 'POST',
+          body: formData,
+          headers: { 'Accept': 'application/json' }
+        });
+
+        /* Éxito — mostrar mensaje y disparar confetti */
+        form.hidden = true;
+        success.hidden = false;
+
+        /* canvas-confetti: dynamic import on-demand
+           No se carga en el bundle inicial — solo cuando hay éxito.
+           Justificado: es el único momento donde se necesita */
+        const { default: confetti } = await import(
+          'https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/+esm'
+        );
+
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.7 },
+          colors: ['#C17E5A', '#7FA98B', '#EDD5C8', '#FDFAF6']
+        });
+
+      } catch {
+        /* Error silencioso — rehabilitar botón */
+        btn.disabled = false;
+        btn.textContent = form.querySelector('button')?.dataset.label || 'Intentar de nuevo';
+      }
+    });
+
+    /* Limpiar estado de error al escribir */
+    form.querySelector('input[type="email"]')?.addEventListener('input', function () {
+      this.classList.remove('error');
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Newsletter",
+  "tag": "section",
+  "class": "boboo-newsletter-section",
+  "settings": [
+    {
+      "type": "richtext",
+      "id": "heading",
+      "label": "Título",
+      "default": "<p>Un 10% de regalo<br><em>en tu primera compra</em></p>"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subtítulo",
+      "default": "Suscríbete y recibe descuentos exclusivos, novedades y mucho amor."
+    },
+    {
+      "type": "text",
+      "id": "placeholder",
+      "label": "Placeholder del campo email",
+      "default": "tu@correo.es"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Texto del botón",
+      "default": "Quiero mi 10% →"
+    },
+    {
+      "type": "text",
+      "id": "note",
+      "label": "Nota legal",
+      "default": "Sin spam. Puedes cancelar en cualquier momento."
+    },
+    {
+      "type": "text",
+      "id": "success_message",
+      "label": "Mensaje de éxito",
+      "default": "🎉 ¡Genial! Ya tienes tu 10% en el correo."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Newsletter BOBOÓ"
+    }
+  ]
+}
+{% endschema %}

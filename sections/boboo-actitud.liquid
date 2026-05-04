@@ -1,0 +1,415 @@
+{%- comment -%}
+  BOBOÓ — Sección "La Actitud" (3 columnas)
+  - Fondo carbon, grid 3 columnas: texto | imagen | valores
+  - Efecto spotlight en título: background-clip:text + radial-gradient + mousemove JS mínimo
+  - Pills: IntersectionObserver + CSS transition stagger
+  - Sin GSAP, sin pin
+{%- endcomment -%}
+
+<section class="boboo-actitud" aria-label="Nuestra actitud" id="bobooActitud">
+  <div class="boboo-actitud__inner">
+
+    {%- comment -%} COLUMNA IZQUIERDA — texto {%- endcomment -%}
+    <div class="boboo-actitud__left">
+      <p class="boboo-actitud__eyebrow">
+        {{ section.settings.eyebrow | default: 'Nuestra filosofía' }}
+      </p>
+
+      <h2 class="boboo-actitud__title" id="actitudTitle">
+        {{ section.settings.title | default: 'La Actitud Boboó.' }}
+      </h2>
+
+      <p class="boboo-actitud__body">
+        {{ section.settings.body | default: 'Creamos ropa unisex para peques porque creemos que la infancia no necesita etiquetas. Solo ropa bonita, cómoda y hecha con amor.' }}
+      </p>
+
+      <a
+        href="{{ section.settings.link_url | default: '/pages/nosotros' }}"
+        class="boboo-actitud__link"
+      >
+        {{ section.settings.link_label | default: 'Conocer la Actitud Boboó →' }}
+      </a>
+    </div>
+
+    {%- comment -%} COLUMNA CENTRAL — imagen {%- endcomment -%}
+    <div class="boboo-actitud__center" aria-hidden="true">
+      {%- if section.settings.image != blank -%}
+        <img
+          class="boboo-actitud__img"
+          src="{{ section.settings.image | image_url: width: 800 }}"
+          srcset="
+            {{ section.settings.image | image_url: width: 400 }} 400w,
+            {{ section.settings.image | image_url: width: 800 }} 800w
+          "
+          sizes="33vw"
+          alt="{{ section.settings.image.alt | default: 'Actitud Boboó' }}"
+          width="{{ section.settings.image.width }}"
+          height="{{ section.settings.image.height }}"
+          loading="lazy"
+        >
+      {%- else -%}
+        <div class="boboo-actitud__img-placeholder"></div>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} COLUMNA DERECHA — valores de marca {%- endcomment -%}
+    <div class="boboo-actitud__right">
+      {%- for block in section.blocks -%}
+        <div class="boboo-actitud__pill" {{ block.shopify_attributes }}>
+          <div class="boboo-actitud__pill-icon" aria-hidden="true">
+            {{ block.settings.icon | default: '🌿' }}
+          </div>
+          <div class="boboo-actitud__pill-text">
+            <strong>{{ block.settings.title | default: 'Valor' }}</strong>
+            <span>{{ block.settings.description }}</span>
+          </div>
+        </div>
+      {%- else -%}
+        <div class="boboo-actitud__pill">
+          <div class="boboo-actitud__pill-icon" aria-hidden="true">🌿</div>
+          <div class="boboo-actitud__pill-text">
+            <strong>Certificado OEKO-TEX</strong>
+            <span>Todas nuestras telas están certificadas. Sin químicos ni tintes nocivos.</span>
+          </div>
+        </div>
+        <div class="boboo-actitud__pill">
+          <div class="boboo-actitud__pill-icon" aria-hidden="true">✂️</div>
+          <div class="boboo-actitud__pill-text">
+            <strong>Hecho a mano en España</strong>
+            <span>Cada prenda se cose en nuestro taller. No producimos en masa.</span>
+          </div>
+        </div>
+        <div class="boboo-actitud__pill">
+          <div class="boboo-actitud__pill-icon" aria-hidden="true">🎨</div>
+          <div class="boboo-actitud__pill-text">
+            <strong>Estampados propios</strong>
+            <span>Diseñamos nuestros propios estampados. Prendas únicas.</span>
+          </div>
+        </div>
+        <div class="boboo-actitud__pill">
+          <div class="boboo-actitud__pill-icon" aria-hidden="true">💛</div>
+          <div class="boboo-actitud__pill-text">
+            <strong>Sin estereotipos</strong>
+            <span>La ropa no define al niño. Solo ropa bonita sin etiquetas de género.</span>
+          </div>
+        </div>
+      {%- endfor -%}
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .boboo-actitud {
+    background: var(--boboo-carbon);
+    color: var(--boboo-cream);
+    overflow: hidden;
+  }
+
+  .boboo-actitud__inner {
+    max-width: var(--boboo-max-width);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    align-items: stretch;
+    min-height: 520px;
+  }
+
+  /* ── Columna izquierda ── */
+  .boboo-actitud__left {
+    padding: 4rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-right: 1px solid rgba(255, 255, 255, .08);
+  }
+
+  .boboo-actitud__eyebrow {
+    font-size: .72rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--boboo-terracota);
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+    font-family: var(--boboo-font-body);
+  }
+
+  /* Título con efecto spotlight via CSS background-clip + mousemove JS */
+  .boboo-actitud__title {
+    font-family: var(--boboo-font-display);
+    font-size: clamp(2rem, 3vw, 3.2rem);
+    font-weight: 300;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+    cursor: default;
+    user-select: none;
+
+    /* Estado base: texto cream sólido */
+    background: radial-gradient(
+      ellipse 5em 2.5em at var(--spot-x, -100%) var(--spot-y, 50%),
+      #ffffff 0%,
+      rgba(253, 250, 246, .7) 35%,
+      var(--boboo-cream) 65%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .boboo-actitud__body {
+    font-size: .88rem;
+    color: rgba(253, 250, 246, .5);
+    line-height: 1.9;
+    font-weight: 300;
+    margin-bottom: 2rem;
+    max-width: 320px;
+    font-family: var(--boboo-font-body);
+  }
+
+  .boboo-actitud__link {
+    font-size: .78rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--boboo-sand);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(212, 196, 176, .4);
+    padding-bottom: 3px;
+    display: inline-block;
+    transition: color var(--boboo-transition-fast), border-color var(--boboo-transition-fast);
+    align-self: flex-start;
+    font-family: var(--boboo-font-body);
+  }
+
+  .boboo-actitud__link:hover {
+    color: var(--boboo-white);
+    border-color: rgba(253, 250, 246, .6);
+  }
+
+  /* ── Columna central — imagen ── */
+  .boboo-actitud__center {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .boboo-actitud__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: brightness(.72) saturate(.8);
+  }
+
+  .boboo-actitud__img-placeholder {
+    width: 100%;
+    height: 100%;
+    min-height: 520px;
+    background: linear-gradient(
+      160deg,
+      rgba(193, 126, 90, .18) 0%,
+      rgba(42, 37, 32, .6) 50%,
+      rgba(127, 169, 139, .12) 100%
+    );
+  }
+
+  /* ── Columna derecha — valores ── */
+  .boboo-actitud__right {
+    padding: 4rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2rem;
+    border-left: 1px solid rgba(255, 255, 255, .08);
+  }
+
+  /* Pills: entrada desde la derecha */
+  .boboo-actitud__pill {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    opacity: 0;
+    transform: translateX(20px);
+    transition: opacity .5s ease, transform .5s ease;
+  }
+
+  .boboo-actitud.is-visible .boboo-actitud__pill { opacity: 1; transform: translateX(0); }
+  .boboo-actitud__pill:nth-child(1) { transition-delay: .1s; }
+  .boboo-actitud__pill:nth-child(2) { transition-delay: .22s; }
+  .boboo-actitud__pill:nth-child(3) { transition-delay: .34s; }
+  .boboo-actitud__pill:nth-child(4) { transition-delay: .46s; }
+
+  .boboo-actitud__pill-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, .12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  .boboo-actitud__pill-text strong {
+    display: block;
+    font-size: .85rem;
+    font-weight: 500;
+    margin-bottom: .3rem;
+    color: var(--boboo-cream);
+    font-family: var(--boboo-font-body);
+  }
+
+  .boboo-actitud__pill-text span {
+    font-size: .8rem;
+    color: rgba(255, 255, 255, .4);
+    line-height: 1.7;
+    font-family: var(--boboo-font-body);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 1024px) {
+    .boboo-actitud__inner {
+      grid-template-columns: 1fr 1fr;
+    }
+    .boboo-actitud__center { display: none; }
+    .boboo-actitud__left { border-right: none; }
+    .boboo-actitud__right { border-left: 1px solid rgba(255,255,255,.08); }
+  }
+
+  @media (max-width: 640px) {
+    .boboo-actitud__inner { grid-template-columns: 1fr; }
+    .boboo-actitud__left  { padding: 3rem var(--boboo-gutter); border-right: none; border-bottom: 1px solid rgba(255,255,255,.08); }
+    .boboo-actitud__right { padding: 3rem var(--boboo-gutter); border-left: none; }
+  }
+
+  /* prefers-reduced-motion */
+  @media (prefers-reduced-motion: reduce) {
+    .boboo-actitud__pill {
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none !important;
+    }
+    .boboo-actitud__title {
+      -webkit-text-fill-color: var(--boboo-cream);
+      background: none;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    const section = document.getElementById('bobooActitud');
+    if (!section) return;
+
+    const noMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (noMotion) { section.classList.add('is-visible'); return; }
+
+    /* IntersectionObserver para las pills */
+    const io = new IntersectionObserver(
+      entries => {
+        entries.forEach(e => {
+          if (e.isIntersecting) { section.classList.add('is-visible'); io.unobserve(section); }
+        });
+      },
+      { threshold: 0.15 }
+    );
+    io.observe(section);
+
+    /* Efecto spotlight en el título: actualiza --spot-x/--spot-y en mousemove.
+       Solo 2 custom properties → sin repaint, solo composite layer update. */
+    const title = document.getElementById('actitudTitle');
+    if (!title) return;
+
+    title.addEventListener('mousemove', function (e) {
+      const r = title.getBoundingClientRect();
+      title.style.setProperty('--spot-x', ((e.clientX - r.left) / r.width * 100).toFixed(1) + '%');
+      title.style.setProperty('--spot-y', ((e.clientY - r.top) / r.height * 100).toFixed(1) + '%');
+    });
+
+    title.addEventListener('mouseleave', function () {
+      /* Mueve el spotlight fuera del elemento — texto vuelve a cream normal */
+      title.style.setProperty('--spot-x', '-100%');
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Actitud BOBOÓ",
+  "tag": "section",
+  "class": "boboo-actitud-section",
+  "max_blocks": 6,
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Texto eyebrow",
+      "default": "Nuestra filosofía"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Título",
+      "default": "La Actitud Boboó."
+    },
+    {
+      "type": "textarea",
+      "id": "body",
+      "label": "Texto descriptivo",
+      "default": "Creamos ropa unisex para peques porque creemos que la infancia no necesita etiquetas. Solo ropa bonita, cómoda y hecha con amor."
+    },
+    {
+      "type": "text",
+      "id": "link_label",
+      "label": "Texto del enlace",
+      "default": "Conocer la Actitud Boboó →"
+    },
+    {
+      "type": "url",
+      "id": "link_url",
+      "label": "URL del enlace"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Imagen central"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "pill",
+      "name": "Valor de marca",
+      "settings": [
+        {
+          "type": "text",
+          "id": "icon",
+          "label": "Emoji",
+          "default": "🌿"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Título",
+          "default": "Certificado OEKO-TEX"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Descripción",
+          "default": "Todas nuestras telas están certificadas."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Actitud BOBOÓ",
+      "blocks": [
+        { "type": "pill", "settings": { "icon": "🌿", "title": "Certificado OEKO-TEX", "description": "Todas nuestras telas están certificadas. Sin químicos ni tintes nocivos." } },
+        { "type": "pill", "settings": { "icon": "✂️", "title": "Hecho a mano en España", "description": "Cada prenda se cose en nuestro taller. No producimos en masa." } },
+        { "type": "pill", "settings": { "icon": "🎨", "title": "Estampados propios", "description": "Diseñamos nuestros propios estampados. Prendas únicas." } },
+        { "type": "pill", "settings": { "icon": "💛", "title": "Sin estereotipos", "description": "La ropa no define al niño. Solo ropa bonita sin etiquetas de género." } }
+      ]
+    }
+  ]
+}
+{% endschema %}

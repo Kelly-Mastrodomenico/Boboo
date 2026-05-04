@@ -1,0 +1,692 @@
+{%- comment -%}
+  BOBOÓ — Hero página de inicio
+  Sesión 1 — Sección custom (sobrevive actualizaciones del tema)
+
+  ARQUITECTURA:
+  · Sección propia en sections/ → Shopify nunca la sobreescribe
+  · CSS embebido en <style> dentro de la sección → no depende de boboo-custom.css
+  · Schema con image_picker → cliente selecciona imagen desde Admin
+  · Badge SVG giratorio con texto circular "OEKO-TEX · HECHO A MANO · ESPAÑA"
+  · Degradado lateral imagen→contenido configurable
+  · Parallax CSS scroll-driven (sin JS, sin GSAP)
+  · Animaciones de entrada CSS con delay escalonado
+  · Accesibilidad: prefers-reduced-motion, loading="eager", fetchpriority="high"
+
+  CÓMO EDITAR DESDE EL ADMIN:
+  Admin → Tienda online → Personalizar → Página de inicio → "Hero BOBOÓ"
+  Todos los campos son editables: imagen, textos, botones, colores, badge.
+{%- endcomment -%}
+
+{%- liquid
+  assign hero_image        = section.settings.image
+  assign hero_image_mobile = section.settings.image_mobile | default: hero_image
+  assign heading           = section.settings.heading | default: 'El regalo que <em>guardarán</em><br>para siempre.'
+  assign subheading        = section.settings.subheading | default: 'Ropa artesanal para bebés y niños que emociona a quien la da y a quien la recibe. Porque los primeros años merecen algo especial.'
+  assign eyebrow           = section.settings.eyebrow | default: 'Ropa infantil artesanal'
+  assign cta_label         = section.settings.cta_primary_label | default: 'Descubrir colección'
+  assign cta_url           = section.settings.cta_primary_url | default: '/collections/all'
+  assign cta2_label        = section.settings.cta_secondary_label
+  assign cta2_url          = section.settings.cta_secondary_url
+  assign badge_line1       = section.settings.badge_line1 | default: 'OEKO-TEX · HECHO A MANO · ESPAÑA · '
+  assign badge_emoji       = section.settings.badge_emoji | default: '🌿'
+  assign show_badge        = section.settings.show_badge
+  assign overlay_opacity   = section.settings.overlay_opacity | default: 20
+  assign overlay_direction = section.settings.overlay_direction | default: 'right'
+-%}
+
+{%- comment -%} Preload LCP — imagen hero cargada lo antes posible {%- endcomment -%}
+{%- if hero_image != blank -%}
+  <link
+    rel="preload"
+    as="image"
+    href="{{ hero_image | image_url: width: 1200 }}"
+    imagesrcset="
+      {{ hero_image | image_url: width: 600 }} 600w,
+      {{ hero_image | image_url: width: 900 }} 900w,
+      {{ hero_image | image_url: width: 1200 }} 1200w
+    "
+    imagesizes="(max-width: 768px) 100vw, 55vw"
+  >
+{%- endif -%}
+
+<section
+  class="boboo-hero"
+  aria-label="Sección principal"
+  {{ block.shopify_attributes }}
+>
+
+  {%- comment -%} ── Columna imagen (izquierda) ── {%- endcomment -%}
+  <div class="boboo-hero__image-col">
+    {%- if hero_image != blank -%}
+      <picture>
+        {%- comment -%}
+          En móvil (<768px) usar imagen mobile si está configurada.
+          Shopify sirve WebP automáticamente vía CDN.
+        {%- endcomment -%}
+        {%- if section.settings.image_mobile != blank -%}
+          <source
+            media="(max-width: 767px)"
+            srcset="
+              {{ hero_image_mobile | image_url: width: 600 }} 600w,
+              {{ hero_image_mobile | image_url: width: 900 }} 900w
+            "
+          >
+        {%- endif -%}
+        <img
+          class="boboo-hero__img"
+          src="{{ hero_image | image_url: width: 1200 }}"
+          srcset="
+            {{ hero_image | image_url: width: 600 }} 600w,
+            {{ hero_image | image_url: width: 900 }} 900w,
+            {{ hero_image | image_url: width: 1200 }} 1200w,
+            {{ hero_image | image_url: width: 1800 }} 1800w
+          "
+          sizes="(max-width: 768px) 100vw, 55vw"
+          alt="{{ hero_image.alt | default: 'Ropa infantil artesanal BOBOÓ' | escape }}"
+          width="{{ hero_image.width }}"
+          height="{{ hero_image.height }}"
+          loading="eager"
+          fetchpriority="high"
+        >
+      </picture>
+    {%- else -%}
+      {%- comment -%} Placeholder cuando no hay imagen asignada {%- endcomment -%}
+      <div class="boboo-hero__placeholder">
+        <p>Selecciona una imagen en el editor del tema →</p>
+      </div>
+    {%- endif -%}
+
+    {%- comment -%}
+      Degradado lateral — funde la imagen hacia el panel de contenido.
+      La dirección (derecha en desktop, abajo en mobile) y opacidad
+      son configurables desde el schema.
+    {%- endcomment -%}
+    <div
+      class="boboo-hero__overlay"
+      style="--overlay-opacity: {{ overlay_opacity | divided_by: 100.0 }}; --overlay-direction: to {{ overlay_direction }};"
+      aria-hidden="true"
+    ></div>
+  </div>
+
+  {%- comment -%} ── Columna contenido (derecha) ── {%- endcomment -%}
+  <div class="boboo-hero__content-col">
+    <div class="boboo-hero__content">
+
+      {%- comment -%} Eyebrow — línea decorativa + etiqueta artesanal {%- endcomment -%}
+      <p class="boboo-hero__eyebrow">
+        <span class="boboo-hero__eyebrow-line" aria-hidden="true"></span>
+        {{ eyebrow }}
+        <span class="boboo-hero__eyebrow-line" aria-hidden="true"></span>
+      </p>
+
+      {%- comment -%}
+        Título H1 — usa richtext para que el cliente pueda poner <em> en sage
+        y <br> para saltos de línea desde el Admin.
+      {%- endcomment -%}
+      <h1 class="boboo-hero__title">{{ heading }}</h1>
+
+      {%- comment -%} Subtítulo — texto descriptivo en gris muted {%- endcomment -%}
+      <p class="boboo-hero__subtitle">{{ subheading }}</p>
+
+      {%- comment -%} CTAs — botón primario obligatorio + secundario opcional {%- endcomment -%}
+      <div class="boboo-hero__ctas">
+        <a
+          href="{{ cta_url }}"
+          class="boboo-hero__btn-primary"
+        >
+          {{ cta_label }}
+        </a>
+
+        {%- if cta2_url != blank and cta2_label != blank -%}
+          <a
+            href="{{ cta2_url }}"
+            class="boboo-hero__btn-secondary"
+          >
+            {{ cta2_label }}
+          </a>
+        {%- endif -%}
+      </div>
+    </div>
+
+    {%- comment -%}
+      Badge SVG giratorio con texto circular.
+      El SVG está inline para control total de estilos.
+      La animación de giro es CSS puro (spin 18s).
+      Se desactiva con prefers-reduced-motion.
+    {%- endcomment -%}
+    {%- if show_badge -%}
+      <div class="boboo-hero__badge" aria-label="{{ badge_line1 | strip_html }}">
+        <svg
+          viewBox="0 0 100 100"
+          width="92"
+          height="92"
+          class="boboo-hero__badge-svg"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <defs>
+            <path
+              id="boboo-badge-path-{{ section.id }}"
+              d="M 50,50 m -33,0 a 33,33 0 1,1 66,0 a 33,33 0 1,1 -66,0"
+            />
+          </defs>
+          {%- comment -%} Fondo circular negro {%- endcomment -%}
+          <circle cx="50" cy="50" r="46" fill="#2A2520"/>
+          {%- comment -%} Anillo decorativo fino {%- endcomment -%}
+          <circle cx="50" cy="50" r="38" fill="none" stroke="#D4C4B0" stroke-width="0.6" opacity="0.5"/>
+          {%- comment -%} Texto circular {%- endcomment -%}
+          <text
+            font-size="9.5"
+            font-family="DM Sans, sans-serif"
+            fill="#D4C4B0"
+            letter-spacing="2.2"
+            font-weight="400"
+          >
+            <textPath href="#boboo-badge-path-{{ section.id }}">
+              {{ badge_line1 }}
+            </textPath>
+          </text>
+          {%- comment -%} Emoji central {%- endcomment -%}
+          <text
+            x="50"
+            y="54"
+            text-anchor="middle"
+            font-size="22"
+            dominant-baseline="middle"
+          >{{ badge_emoji }}</text>
+        </svg>
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+<style>
+  /* ────────────────────────────────────────────────────
+     BOBOÓ HERO — Estilos embebidos en la sección
+     Prefijo: .boboo-hero__ — cero colisiones con Horizon
+     Sesión 1
+  ──────────────────────────────────────────────────── */
+
+  /* ── Layout: grid 55/45 desktop, columna en mobile ── */
+  .boboo-hero {
+    display: grid;
+    grid-template-columns: 55fr 45fr;
+    min-height: min(90vh, 800px);
+    background: var(--boboo-cream, #F5EFE6);
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* ── Columna imagen ── */
+  .boboo-hero__image-col {
+    position: relative;
+    overflow: hidden;
+    background: var(--boboo-warm, #EDE3D8);
+  }
+
+  .boboo-hero__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    display: block;
+    filter: brightness(.97);
+    /* Parallax CSS scroll-driven — cero JS, cero GSAP
+       @supports evita romper navegadores sin soporte */
+    @supports (animation-timeline: scroll()) {
+      animation: boboo-hero-parallax linear both;
+      animation-timeline: scroll();
+      animation-range: entry 0% cover 50%;
+    }
+  }
+
+  @keyframes boboo-hero-parallax {
+    from { transform: translateY(0); }
+    to   { transform: translateY(-60px); }
+  }
+
+  /* Placeholder cuando no hay imagen asignada */
+  .boboo-hero__placeholder {
+    width: 100%;
+    height: 100%;
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--boboo-warm, #EDE3D8);
+    color: var(--boboo-muted, #8A7E74);
+    font-family: var(--boboo-font-body, 'DM Sans', sans-serif);
+    font-size: .9rem;
+    text-align: center;
+    padding: 2rem;
+  }
+
+  /* Overlay: funde la imagen hacia el contenido */
+  .boboo-hero__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      var(--overlay-direction, to right),
+      transparent 45%,
+      rgba(245, 239, 230, var(--overlay-opacity, 0.2)) 75%,
+      rgba(245, 239, 230, 1) 100%
+    );
+    pointer-events: none;
+  }
+
+  /* ── Columna contenido ── */
+  .boboo-hero__content-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    padding: 5rem 4.5rem 5rem 3.5rem;
+    background: var(--boboo-cream, #F5EFE6);
+  }
+
+  .boboo-hero__content {
+    max-width: 480px;
+  }
+
+  /* ── Eyebrow — texto artesanal con líneas decorativas ── */
+  .boboo-hero__eyebrow {
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+    font-family: var(--boboo-font-body, 'DM Sans', sans-serif);
+    font-size: .7rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--boboo-terracota, #C17E5A);
+    font-weight: 500;
+    margin: 0 0 1.6rem;
+    /* Animación de entrada */
+    opacity: 0;
+    animation: boboo-hero-fade .8s .15s both ease;
+  }
+
+  .boboo-hero__eyebrow-line {
+    display: block;
+    width: 22px;
+    height: 1px;
+    background: currentColor;
+    opacity: .7;
+    flex-shrink: 0;
+  }
+
+  /* ── Título H1 ── */
+  .boboo-hero__title {
+    font-family: var(--boboo-font-display, 'Cormorant Garamond', Georgia, serif);
+    font-size: clamp(2.8rem, 4.5vw, 4.8rem);
+    font-weight: 300;
+    line-height: 1.08;
+    letter-spacing: -.01em;
+    color: var(--boboo-carbon, #2A2520);
+    margin: 0 0 1.8rem;
+    /* Animación de entrada */
+    opacity: 0;
+    animation: boboo-hero-fade .8s .35s both ease;
+  }
+
+  /* <em> en el título → cursiva en sage-dk */
+  .boboo-hero__title em {
+    font-style: italic;
+    color: var(--boboo-sage-dk, #5C8068);
+  }
+
+  /* ── Subtítulo ── */
+  .boboo-hero__subtitle {
+    font-family: var(--boboo-font-body, 'DM Sans', sans-serif);
+    font-size: .95rem;
+    font-weight: 300;
+    line-height: 1.75;
+    color: var(--boboo-muted, #8A7E74);
+    max-width: 360px;
+    margin: 0 0 2.8rem;
+    /* Animación de entrada */
+    opacity: 0;
+    animation: boboo-hero-fade .8s .55s both ease;
+  }
+
+  /* ── CTAs ── */
+  .boboo-hero__ctas {
+    display: flex;
+    flex-direction: column;
+    gap: .8rem;
+    max-width: 260px;
+    /* Animación de entrada */
+    opacity: 0;
+    animation: boboo-hero-fade .8s .75s both ease;
+  }
+
+  /* Botón primario — carbon con ola terracota en hover */
+  .boboo-hero__btn-primary {
+    display: inline-block;
+    background: var(--boboo-carbon, #2A2520);
+    color: var(--boboo-white, #FDFAF6);
+    padding: 1rem 2rem;
+    font-family: var(--boboo-font-body, 'DM Sans', sans-serif);
+    font-size: .78rem;
+    font-weight: 500;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    text-align: center;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    transition: color .2s ease;
+  }
+
+  /* Ola terracota en hover — capas ::before y ::after */
+  .boboo-hero__btn-primary::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    width: 140%; height: 180%;
+    background: rgba(0,0,0,.05);
+    border-radius: 50%;
+    transform: translateX(-50%) scaleY(1) scaleX(1.25);
+    transition: all .5s .1s cubic-bezier(.55, 0, .1, 1);
+    z-index: -1;
+  }
+  .boboo-hero__btn-primary::after {
+    content: '';
+    position: absolute;
+    left: 55%;
+    top: 180%;
+    width: 160%; height: 190%;
+    background: var(--boboo-terracota, #C17E5A);
+    border-radius: 50%;
+    transform: translateX(-50%) scaleY(1) scaleX(1.45);
+    transition: all .5s .1s cubic-bezier(.55, 0, .1, 1);
+    z-index: -1;
+  }
+  .boboo-hero__btn-primary:hover { color: var(--boboo-white, #FDFAF6); }
+  .boboo-hero__btn-primary:hover::before {
+    top: -35%;
+    background: var(--boboo-terracota, #C17E5A);
+    transform: translateX(-50%) scaleY(1.3) scaleX(0.8);
+  }
+  .boboo-hero__btn-primary:hover::after {
+    top: -45%;
+    background: var(--boboo-terracota, #C17E5A);
+    transform: translateX(-50%) scaleY(1.3) scaleX(0.8);
+  }
+
+  /* Botón secundario — link subrayado */
+  .boboo-hero__btn-secondary {
+    display: inline-block;
+    color: var(--boboo-carbon, #2A2520);
+    font-family: var(--boboo-font-body, 'DM Sans', sans-serif);
+    font-size: .78rem;
+    font-weight: 400;
+    letter-spacing: .06em;
+    text-decoration: none;
+    text-align: center;
+    padding: .6rem 0;
+    border-bottom: 1px solid rgba(42, 37, 32, .3);
+    transition: border-color .2s ease, color .2s ease;
+  }
+  .boboo-hero__btn-secondary:hover {
+    color: var(--boboo-terracota, #C17E5A);
+    border-color: var(--boboo-terracota, #C17E5A);
+  }
+
+  /* ── Badge SVG giratorio ── */
+  .boboo-hero__badge {
+    position: absolute;
+    bottom: 3rem;
+    right: 3rem;
+    /* El badge flota con animación vertical sutil */
+    animation: boboo-badge-float 3.5s ease-in-out infinite;
+  }
+
+  .boboo-hero__badge-svg {
+    display: block;
+    filter: drop-shadow(0 4px 16px rgba(42, 37, 32, .22));
+    /* Giro continuo del SVG */
+    animation: boboo-badge-spin 18s linear infinite;
+  }
+
+  @keyframes boboo-badge-spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  @keyframes boboo-badge-float {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-8px); }
+  }
+
+  /* ── Animaciones de entrada CSS — sin GSAP ── */
+  @keyframes boboo-hero-fade {
+    from {
+      opacity: 0;
+      transform: translateY(28px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* ── Responsive — Mobile (<900px): columna vertical ── */
+  @media (max-width: 900px) {
+    .boboo-hero {
+      grid-template-columns: 1fr;
+      min-height: auto;
+    }
+
+    .boboo-hero__image-col {
+      height: 60vw;
+      max-height: 440px;
+    }
+
+    /* En mobile el overlay va de abajo hacia arriba */
+    .boboo-hero__overlay {
+      background: linear-gradient(
+        to bottom,
+        transparent 40%,
+        rgba(245, 239, 230, .5) 75%,
+        rgba(245, 239, 230, 1) 100%
+      );
+    }
+
+    .boboo-hero__content-col {
+      padding: 2.5rem 1.5rem 3.5rem;
+    }
+
+    .boboo-hero__content {
+      max-width: 100%;
+    }
+
+    .boboo-hero__title {
+      font-size: clamp(2.2rem, 8vw, 3rem);
+    }
+
+    .boboo-hero__subtitle {
+      max-width: 100%;
+    }
+
+    .boboo-hero__ctas {
+      max-width: 100%;
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+
+    .boboo-hero__btn-primary {
+      flex: 1;
+      min-width: 160px;
+    }
+
+    /* El badge baja al interior en mobile */
+    .boboo-hero__badge {
+      bottom: 1rem;
+      right: 1rem;
+    }
+
+    .boboo-hero__badge-svg {
+      width: 70px;
+      height: 70px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .boboo-hero__image-col {
+      height: 72vw;
+    }
+
+    .boboo-hero__eyebrow {
+      font-size: .65rem;
+    }
+
+    .boboo-hero__badge {
+      display: none; /* En pantallas muy pequeñas el badge ocupa demasiado espacio */
+    }
+  }
+
+  /* ── Accesibilidad: movimiento reducido ── */
+  @media (prefers-reduced-motion: reduce) {
+    .boboo-hero__img { animation: none !important; }
+    .boboo-hero__eyebrow,
+    .boboo-hero__title,
+    .boboo-hero__subtitle,
+    .boboo-hero__ctas {
+      animation: none !important;
+      opacity: 1;
+    }
+    .boboo-hero__badge { animation: none !important; }
+    .boboo-hero__badge-svg { animation: none !important; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Hero BOBOÓ",
+  "tag": "section",
+  "class": "boboo-hero-wrapper",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Imagen"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Imagen principal (desktop)"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_mobile",
+      "label": "Imagen móvil (opcional — si no se elige, usa la principal)"
+    },
+    {
+      "type": "header",
+      "content": "Textos"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Texto eyebrow (sobre el título)",
+      "default": "Ropa infantil artesanal"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Título principal — usa <em>texto</em> para cursiva sage",
+      "default": "El regalo que <em>guardarán</em><br>para siempre."
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subtítulo",
+      "default": "Ropa artesanal para bebés y niños que emociona a quien la da y a quien la recibe. Porque los primeros años merecen algo especial."
+    },
+    {
+      "type": "header",
+      "content": "Botones"
+    },
+    {
+      "type": "text",
+      "id": "cta_primary_label",
+      "label": "Texto botón principal",
+      "default": "Descubrir colección"
+    },
+    {
+      "type": "url",
+      "id": "cta_primary_url",
+      "label": "Enlace botón principal"
+    },
+    {
+      "type": "text",
+      "id": "cta_secondary_label",
+      "label": "Texto botón secundario (opcional — dejar vacío para ocultar)",
+      "default": "Ver más vendidos"
+    },
+    {
+      "type": "url",
+      "id": "cta_secondary_url",
+      "label": "Enlace botón secundario"
+    },
+    {
+      "type": "header",
+      "content": "Badge circular giratorio"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_badge",
+      "label": "Mostrar badge giratorio",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "badge_line1",
+      "label": "Texto del badge (circular)",
+      "default": "OEKO-TEX · HECHO A MANO · ESPAÑA · ",
+      "info": "El texto se repite en círculo. Añade espacios o · al final para separación."
+    },
+    {
+      "type": "text",
+      "id": "badge_emoji",
+      "label": "Icono central del badge",
+      "default": "🌿",
+      "info": "Emoji o símbolo que aparece en el centro del badge."
+    },
+    {
+      "type": "header",
+      "content": "Degradado imagen"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Intensidad del degradado (%)",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "default": 20,
+      "info": "Controla qué tan fuerte funde la imagen hacia el panel de texto."
+    },
+    {
+      "type": "select",
+      "id": "overlay_direction",
+      "label": "Dirección del degradado",
+      "options": [
+        { "value": "right", "label": "Izquierda → Derecha (imagen izquierda)" },
+        { "value": "left",  "label": "Derecha → Izquierda (imagen derecha)" },
+        { "value": "bottom","label": "Arriba → Abajo" }
+      ],
+      "default": "right"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero BOBOÓ"
+    }
+  ]
+}
+{% endschema %}

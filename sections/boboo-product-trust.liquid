@@ -1,0 +1,92 @@
+{%- comment -%}
+  BOBOÓ — Mini trust signals para página de producto
+  Sesión 5 — Sección custom (sobrevive actualizaciones)
+
+  CÓMO AÑADIR:
+  Admin → Personalizar → Página de producto → Añadir bloque
+  dentro de "Información del producto" → Código personalizado
+  O añadir como sección separada debajo del producto.
+
+  DISEÑO:
+  · Fila de iconos + texto corto debajo del botón ATC
+  · Bloques configurables: emoji + texto corto + texto secundario
+  · Fondo transparente — hereda el color de la sección de producto
+  · Sin GSAP, sin JS — CSS puro
+{%- endcomment -%}
+
+<div class="boboo-product-trust">
+  {%- for block in section.blocks -%}
+    <div class="boboo-product-trust__item" {{ block.shopify_attributes }}>
+      <span aria-hidden="true">{{ block.settings.icon | default: '✓' }}</span>
+      <span>
+        <strong>{{ block.settings.label }}</strong>
+        {%- if block.settings.sublabel != blank -%}
+          · {{ block.settings.sublabel }}
+        {%- endif -%}
+      </span>
+    </div>
+  {%- else -%}
+    <div class="boboo-product-trust__item">
+      <span aria-hidden="true">🌿</span>
+      <span><strong>OEKO-TEX</strong> · Tela certificada</span>
+    </div>
+    <div class="boboo-product-trust__item">
+      <span aria-hidden="true">🧵</span>
+      <span><strong>Hecho a mano</strong> · En España</span>
+    </div>
+    <div class="boboo-product-trust__item">
+      <span aria-hidden="true">📦</span>
+      <span><strong>Envío gratis</strong> · Desde 60€</span>
+    </div>
+    <div class="boboo-product-trust__item">
+      <span aria-hidden="true">↩️</span>
+      <span><strong>30 días</strong> · Devolución gratuita</span>
+    </div>
+  {%- endfor -%}
+</div>
+
+{% schema %}
+{
+  "name": "Trust signals producto",
+  "tag": "div",
+  "class": "boboo-product-trust-section",
+  "max_blocks": 6,
+  "blocks": [
+    {
+      "type": "trust_item",
+      "name": "Señal de confianza",
+      "settings": [
+        {
+          "type": "text",
+          "id": "icon",
+          "label": "Emoji",
+          "default": "✓"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Texto principal",
+          "default": "Hecho a mano"
+        },
+        {
+          "type": "text",
+          "id": "sublabel",
+          "label": "Texto secundario (opcional)",
+          "default": "En España"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Trust signals BOBOÓ",
+      "blocks": [
+        { "type": "trust_item", "settings": { "icon": "🌿", "label": "OEKO-TEX", "sublabel": "Tela certificada" } },
+        { "type": "trust_item", "settings": { "icon": "🧵", "label": "Hecho a mano", "sublabel": "En España" } },
+        { "type": "trust_item", "settings": { "icon": "📦", "label": "Envío gratis", "sublabel": "Desde 60€" } },
+        { "type": "trust_item", "settings": { "icon": "↩️", "label": "30 días", "sublabel": "Devolución gratuita" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,1378 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   BOBOÓ — CSS personalizado
+   Archivo: assets/boboo-custom.css
+   Sesión: 1 — Sistema de marca base
+   Fecha: 2026-04-09
+
+   ESTRATEGIA DE CARGA:
+   Este archivo se carga en snippets/stylesheets.liquid DESPUÉS de base.css.
+   Las variables :root aquí definen la identidad visual; la especificidad
+   es la misma (:root) pero gana porque se carga más tarde en la cascada.
+
+   CONVENCIONES:
+   · Todos los selectores custom usan prefijo boboo- o [data-boboo-*]
+   · !important solo donde Horizon inyecta estilos inline (documentado)
+   · CSS maneja todos los estados visuales; JS solo alterna clases
+   ═══════════════════════════════════════════════════════════════════════ */
+
+
+/* ───────────────────────────────────────────────────────
+   1. PALETA Y VARIABLES DE MARCA
+   ─────────────────────────────────────────────────────── */
+:root {
+  /* Colores principales */
+  --boboo-carbon:    #2A2520;
+  --boboo-white:     #FDFAF6;
+  --boboo-cream:     #F5EFE6;
+  --boboo-warm:      #EDE3D8;
+  --boboo-sand:      #D4C4B0;
+  --boboo-blush:     #EDD5C8;
+  --boboo-terracota: #C17E5A;
+  --boboo-sage:      #7FA98B;
+  --boboo-sage-dk:   #5C8068;
+  --boboo-muted:     #8A7E74;
+  --boboo-rosa:      #D4728A; /* Solo CTA mobile — nunca en desktop */
+
+  /* Valores RGB para uso con rgba() o color-mix() */
+  --boboo-carbon-rgb:    42, 37, 32;
+  --boboo-cream-rgb:     245, 239, 230;
+  --boboo-terracota-rgb: 193, 126, 90;
+  --boboo-sage-rgb:      127, 169, 139;
+  --boboo-sand-rgb:      212, 196, 176;
+
+  /* Tipografía */
+  --boboo-font-display: 'Cormorant Garamond', Georgia, serif;
+  --boboo-font-body:    'DM Sans', system-ui, sans-serif;
+  --boboo-font-accent:  'Caveat', cursive;
+
+  /* Espaciado */
+  --boboo-max-width: 1280px;
+  --boboo-gutter:    2rem;
+
+  /* Radios de borde */
+  --boboo-radius-sm: 2px;
+  --boboo-radius-md: 4px;
+  --boboo-radius-lg: 8px;
+
+  /* Sombras */
+  --boboo-shadow-card:   0 4px 24px rgba(var(--boboo-carbon-rgb), .08);
+  --boboo-shadow-panel:  0 8px 32px rgba(var(--boboo-carbon-rgb), .12);
+  --boboo-shadow-drawer: 0 0 60px rgba(var(--boboo-carbon-rgb), .18);
+
+  /* Curvas de animación */
+  --boboo-ease:        cubic-bezier(.25, .46, .45, .94);
+  --boboo-ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+
+  /* Transiciones estándar */
+  --boboo-t-fast:   .2s ease;
+  --boboo-t-normal: .35s ease;
+  --boboo-t-slow:   .6s var(--boboo-ease);
+  --boboo-t-spring: .6s var(--boboo-ease-spring);
+
+  /* ── Sobreescribir variables de color de Horizon ──
+     color-schemes.liquid las genera inline con style="";
+     este archivo se carga después → gana en la cascada.
+     No se usa !important aquí — la carga posterior es suficiente. */
+  --color-background:             var(--boboo-cream);
+  --color-background-rgb:         var(--boboo-cream-rgb);
+  --color-foreground:             var(--boboo-carbon);
+  --color-foreground-rgb:         var(--boboo-carbon-rgb);
+  --color-foreground-heading:     var(--boboo-carbon);
+  --color-primary:                var(--boboo-terracota);
+  --color-primary-rgb:            var(--boboo-terracota-rgb);
+  --color-border:                 var(--boboo-sand);
+  --color-border-rgb:             var(--boboo-sand-rgb);
+
+  /* Botón primario */
+  --color-primary-button-background:       var(--boboo-carbon);
+  --color-primary-button-text:             var(--boboo-white);
+  --color-primary-button-hover-background: var(--boboo-terracota);
+  --color-primary-button-hover-text:       var(--boboo-white);
+
+  /* Botón secundario */
+  --color-secondary-button-text:             var(--boboo-carbon);
+  --color-secondary-button-background:       transparent;
+  --color-secondary-button-border:           var(--boboo-carbon);
+  --color-secondary-button-hover-text:       var(--boboo-white);
+  --color-secondary-button-hover-background: var(--boboo-carbon);
+
+  /* Inputs */
+  --color-input-background: var(--boboo-white);
+  --color-input-text:       var(--boboo-carbon);
+  --color-input-border:     var(--boboo-sand);
+
+  /* Variantes de producto */
+  --color-variant-background:          var(--boboo-white);
+  --color-variant-border:              var(--boboo-sand);
+  --color-variant-text:                var(--boboo-carbon);
+  --color-variant-hover-background:    var(--boboo-warm);
+  --color-selected-variant-background: var(--boboo-carbon);
+  --color-selected-variant-border:     var(--boboo-carbon);
+  --color-selected-variant-text:       var(--boboo-white);
+
+  /* Sobreescribir familias tipográficas de Horizon */
+  --font-body--family:    var(--boboo-font-body);
+  --font-heading--family: var(--boboo-font-display);
+}
+
+
+/* ───────────────────────────────────────────────────────
+   2. BASE Y RESET MÍNIMO
+   ─────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+body {
+  font-family: var(--boboo-font-body);
+  background: var(--boboo-cream);
+  color: var(--boboo-carbon);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+
+/* ───────────────────────────────────────────────────────
+   3. TIPOGRAFÍA GLOBAL
+   ─────────────────────────────────────────────────────── */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--boboo-font-display);
+  font-weight: 300;
+  line-height: 1.1;
+  color: var(--boboo-carbon);
+}
+
+em {
+  font-style: italic;
+  color: var(--boboo-sage-dk);
+}
+
+/* Clases de ayuda tipográfica */
+.font-display { font-family: var(--boboo-font-display); }
+.font-accent  { font-family: var(--boboo-font-accent); }
+.font-body    { font-family: var(--boboo-font-body); }
+
+/* Etiqueta de sección (ej: "COLECCIONES", "NOVEDADES") */
+.boboo-section-tag {
+  display: inline-block;
+  font-family: var(--boboo-font-body);
+  font-size: .72rem;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--boboo-terracota);
+  font-weight: 500;
+}
+
+/* Título principal de sección */
+.boboo-section-title {
+  font-family: var(--boboo-font-display);
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 300;
+  line-height: 1.1;
+  color: var(--boboo-carbon);
+}
+
+/* Cabecera de sección: etiqueta + título centrados */
+.boboo-section-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+.boboo-section-header .boboo-section-tag {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+/* Los h2 dentro de secciones del tema heredan Cormorant */
+.section .text-block.heading-xl h2,
+.section .text-block.heading-2xl h2,
+.section .text-block.heading-lg h2 {
+  font-family: var(--boboo-font-display) !important;
+  font-weight: 300;
+  line-height: 1.1;
+}
+.section .text-block.heading-xl h2 em,
+.section .text-block.heading-2xl h2 em,
+.section .text-block.heading-lg h2 em {
+  font-style: italic;
+  color: var(--boboo-sage-dk);
+}
+
+
+/* ───────────────────────────────────────────────────────
+   4. HEADER — Fondo blur y comportamiento scroll
+   ─────────────────────────────────────────────────────── */
+
+/* El selector [data-boboo-header] es el hook CSS del header.
+   Se añade como atributo al <header-component> en sections/header.liquid.
+   Si el tema se actualiza y el atributo se pierde → los estilos
+   dejan de aplicarse pero no rompen nada (degradación elegante). */
+
+/* !important aquí: Horizon asigna --color-scheme-top-row inline en el HTML
+   via style="" (especificidad máxima). Sin !important no podemos sobreescribirlo. */
+[data-boboo-header] {
+  --color-scheme-top-row:    rgba(253, 250, 246, 0.92) !important;
+  --color-scheme-bottom-row: rgba(253, 250, 246, 0.92) !important;
+}
+
+/* Aplica el desenfoque al underlay — el elemento que pinta el fondo visible */
+[data-boboo-header] .header__underlay-closed,
+[data-boboo-header] .header__underlay-open {
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+}
+
+/* Borde inferior sutil */
+[data-boboo-header] .header__row--top {
+  border-bottom: 1px solid rgba(212, 196, 176, 0.35) !important;
+}
+
+/* Sombra que aparece al hacer scroll (clase añadida por boboo-main.js) */
+[data-boboo-header].boboo-scrolled .header__underlay-closed {
+  box-shadow: 0 2px 24px rgba(var(--boboo-carbon-rgb), .10) !important;
+  transition: box-shadow .3s ease;
+}
+
+
+/* ───────────────────────────────────────────────────────
+   5. HEADER — Navegación (línea hover terracota)
+   ─────────────────────────────────────────────────────── */
+[data-boboo-header] .menu-list__link {
+  position: relative;
+  transition: color var(--boboo-t-fast);
+}
+
+/* Línea subrayado que crece desde el centro al hacer hover */
+[data-boboo-header] .menu-list__link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0; right: 0;
+  height: 1px;
+  background: var(--boboo-terracota);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform .25s ease;
+}
+
+[data-boboo-header] .menu-list__link:hover::after { transform: scaleX(1); }
+[data-boboo-header] .menu-list__link:hover { color: var(--boboo-terracota); }
+
+
+/* ───────────────────────────────────────────────────────
+   6. CURSOR PERSONALIZADO
+   Visible solo en dispositivos con puntero fino (ratón/trackpad).
+   La lógica de movimiento está en boboo-main.js.
+   ─────────────────────────────────────────────────────── */
+@media (pointer: fine) {
+  /* Ocultar cursor nativo cuando boboo-cursor-active está en body */
+  body.boboo-cursor-active,
+  body.boboo-cursor-active a,
+  body.boboo-cursor-active button,
+  body.boboo-cursor-active [role="button"] { cursor: none; }
+}
+
+.boboo-cursor {
+  position: fixed;
+  top: 0; left: 0;
+  width: 10px; height: 10px;
+  background: var(--boboo-terracota);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+  transition:
+    width .2s var(--boboo-ease-spring),
+    height .2s var(--boboo-ease-spring),
+    opacity .3s ease;
+  will-change: transform;
+}
+
+/* Estado expandido: al pasar sobre elementos interactivos */
+.boboo-cursor.boboo-cursor--hover {
+  width: 28px; height: 28px;
+  background: rgba(var(--boboo-terracota-rgb), .15);
+  border: 1.5px solid var(--boboo-terracota);
+}
+
+.boboo-cursor.boboo-cursor--hidden { opacity: 0; }
+
+/* Ocultar en móvil y tablet */
+@media (max-width: 749px) { .boboo-cursor { display: none; } }
+
+
+/* ───────────────────────────────────────────────────────
+   7. SCROLL REVEAL — IntersectionObserver
+   La clase .boboo-reveal se añade manualmente a elementos
+   en secciones custom. JS observa y añade .visible al entrar
+   en viewport. Sin GSAP: CSS transition es suficiente.
+   ─────────────────────────────────────────────────────── */
+.boboo-reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition:
+    opacity .6s ease,
+    transform .6s var(--boboo-ease);
+}
+
+.boboo-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Delays escalonados para grupos de elementos */
+.boboo-reveal--delay-1 { transition-delay: .10s; }
+.boboo-reveal--delay-2 { transition-delay: .20s; }
+.boboo-reveal--delay-3 { transition-delay: .30s; }
+.boboo-reveal--delay-4 { transition-delay: .40s; }
+
+
+/* ───────────────────────────────────────────────────────
+   8. TARJETAS DE PRODUCTO — Overrides sobre clases de Horizon
+   Clases auditadas en el HTML de Horizon:
+   product-card, .card-gallery, product-title, .quick-add__button
+   ─────────────────────────────────────────────────────── */
+
+/* Radio en la galería de imágenes */
+product-card .card-gallery {
+  border-radius: var(--boboo-radius-md);
+  overflow: hidden;
+}
+
+/* Título del producto en Cormorant */
+product-card .text-block p,
+product-card product-title .text-block p {
+  font-family: var(--boboo-font-display) !important;
+  font-weight: 400;
+  line-height: 1.25;
+}
+
+/* Color terracota en hover del título */
+product-card:is(:hover, :focus-within) .text-block p,
+product-card:is(:hover, :focus-within) product-title .text-block p {
+  color: var(--boboo-terracota);
+  transition: color var(--boboo-t-fast);
+}
+
+/* Botón "Añadir al carrito" rápido */
+product-card .quick-add__button {
+  background: linear-gradient(var(--boboo-carbon) 0 100%) padding-box !important;
+  border-color: rgba(253, 250, 246, .15) !important;
+  color: var(--boboo-white) !important;
+}
+product-card .quick-add__button:hover {
+  background: linear-gradient(var(--boboo-terracota) 0 100%) padding-box !important;
+}
+product-card .quick-add__button .add-to-cart-text {
+  background: transparent !important;
+  color: var(--boboo-white);
+}
+
+/* En móvil, el ATC usa el rosa de marca */
+@media (max-width: 749px) {
+  product-card .quick-add__button {
+    background: linear-gradient(var(--boboo-rosa) 0 100%) padding-box !important;
+  }
+}
+
+/* Estrellas de valoración en terracota */
+product-card .rating-wrapper {
+  --star-fill-color: var(--boboo-terracota);
+  --star-fill-color-rgb: var(--boboo-terracota-rgb);
+}
+
+
+/* ───────────────────────────────────────────────────────
+   9. TARJETAS DE COLECCIÓN — Overrides sobre clases de Horizon
+   Clase .collection-card--image-bg activa cuando el texto
+   está posicionado "sobre la imagen" en el editor del tema.
+   ─────────────────────────────────────────────────────── */
+.collection-card {
+  overflow: hidden;
+  border-radius: var(--boboo-radius-md);
+}
+
+/* Zoom leve en hover de imagen */
+.collection-card .resource-image__image {
+  transition: transform .6s var(--boboo-ease);
+}
+.collection-card:hover .resource-image__image { transform: scale(1.06); }
+
+/* Overlay degradado oscuro desde abajo (solo en modo "texto sobre imagen") */
+.collection-card--image-bg .collection-card__inner { position: relative; }
+.collection-card--image-bg .collection-card__inner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(42, 37, 32, .72) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 1;
+  border-radius: inherit;
+}
+
+.collection-card--image-bg .collection-card__content {
+  position: relative;
+  z-index: 2;
+}
+
+/* Título de colección en Cormorant blanco */
+.collection-card--image-bg .collection-card__content .text-block p {
+  font-family: var(--boboo-font-display) !important;
+  font-weight: 400;
+  font-size: 1.1rem;
+  color: white !important;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, .4);
+}
+
+/* Enlace "Ver colección" estilo minimalista */
+.collection-card--image-bg .collection-card__content .link {
+  color: rgba(255, 255, 255, .85) !important;
+  font-size: .72rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255, 255, 255, .4);
+  padding-bottom: 2px;
+  transition: color var(--boboo-t-fast), border-color var(--boboo-t-fast);
+}
+.collection-card--image-bg:hover .collection-card__content .link {
+  color: white !important;
+  border-color: white;
+}
+
+
+/* ───────────────────────────────────────────────────────
+   10. BOTÓN PRIMARIO — Efecto ola terracota en hover
+   AUDITORÍA base.css: .button usa display:grid.
+   Los pseudoelementos absolutos son compatibles con display:grid
+   siempre que el padre tenga position:relative y overflow:hidden.
+   ─────────────────────────────────────────────────────── */
+.button:not(.button-secondary, .button-unstyled, .quick-add__button) {
+  position: relative !important;
+  overflow: hidden !important;
+  z-index: 1;
+  background: var(--boboo-carbon) !important;
+  color: var(--boboo-white) !important;
+  border-radius: var(--boboo-radius-md) !important;
+  transition: color .2s ease-in !important;
+}
+
+/* Ola terracota — capa 1 */
+.button:not(.button-secondary, .button-unstyled, .quick-add__button)::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%) scaleY(1) scaleX(1.25);
+  top: 100%;
+  width: 140%; height: 180%;
+  background: rgba(0, 0, 0, .05);
+  border-radius: 50%;
+  display: block;
+  transition: all .5s .1s cubic-bezier(.55, 0, .1, 1);
+  z-index: -1;
+}
+
+/* Ola terracota — capa 2 */
+.button:not(.button-secondary, .button-unstyled, .quick-add__button)::after {
+  content: '';
+  position: absolute;
+  left: 55%;
+  transform: translateX(-50%) scaleY(1) scaleX(1.45);
+  top: 180%;
+  width: 160%; height: 190%;
+  background: var(--boboo-terracota);
+  border-radius: 50%;
+  display: block;
+  transition: all .5s .1s cubic-bezier(.55, 0, .1, 1);
+  z-index: -1;
+}
+
+.button:not(.button-secondary, .button-unstyled, .quick-add__button):hover {
+  color: var(--boboo-white) !important;
+}
+.button:not(.button-secondary, .button-unstyled, .quick-add__button):hover::before {
+  top: -35%;
+  background: var(--boboo-terracota);
+  transform: translateX(-50%) scaleY(1.3) scaleX(0.8);
+}
+.button:not(.button-secondary, .button-unstyled, .quick-add__button):hover::after {
+  top: -45%;
+  background: var(--boboo-terracota);
+  transform: translateX(-50%) scaleY(1.3) scaleX(0.8);
+}
+
+
+/* ───────────────────────────────────────────────────────
+   11. BOTÓN SECUNDARIO — Efecto jello
+   ─────────────────────────────────────────────────────── */
+@keyframes boboo-jello {
+  0%   { transform: scale3d(1, 1, 1); }
+  30%  { transform: scale3d(1.25, 0.75, 1); }
+  40%  { transform: scale3d(0.75, 1.25, 1); }
+  50%  { transform: scale3d(1.15, 0.85, 1); }
+  65%  { transform: scale3d(0.95, 1.05, 1); }
+  75%  { transform: scale3d(1.05, 0.95, 1); }
+  100% { transform: scale3d(1, 1, 1); }
+}
+.button-secondary:hover { animation: boboo-jello .9s both; }
+
+
+/* ───────────────────────────────────────────────────────
+   12. ENLACE .link — Línea doble que crece desde el centro
+   Excluye los enlaces dentro de tarjetas de colección
+   (tienen su propio tratamiento en la sección 9).
+   ─────────────────────────────────────────────────────── */
+a.link:not(.collection-card__content .link) {
+  position: relative;
+  text-decoration: none;
+}
+
+a.link:not(.collection-card__content .link)::before,
+a.link:not(.collection-card__content .link)::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  width: 0%;
+  height: 1.5px;
+  background: var(--boboo-terracota);
+  transition: width .4s ease;
+}
+a.link:not(.collection-card__content .link)::before { right: 50%; }
+a.link:not(.collection-card__content .link)::after  { left: 50%; }
+a.link:not(.collection-card__content .link):hover::before,
+a.link:not(.collection-card__content .link):hover::after { width: 50%; }
+
+
+/* ───────────────────────────────────────────────────────
+   13. HÉROE — Badge circular giratorio
+   Posicionado en la esquina inferior derecha del panel de imagen.
+   Selector basado en: .section--full-width .group-block.color-scheme-5
+   (color-scheme-5 = el panel de imagen en el split del hero de Horizon)
+   ─────────────────────────────────────────────────────── */
+.section--full-width .group-block.color-scheme-5 {
+  position: relative;
+}
+
+@keyframes boboo-badge-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.section--full-width .group-block.color-scheme-5::after {
+  content: '';
+  position: absolute;
+  bottom: 2.5rem;
+  right: -45px; /* Sobresale hacia el panel de contenido */
+  width: 90px; height: 90px;
+  /* SVG inline: círculo negro con texto circular "OEKO-TEX · HECHO A MANO ·"
+     y símbolo ✿ en terracota en el centro */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3Cpath id='circ' d='M 50,50 m -37,0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0'/%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='46' fill='%232A2520' opacity='0.9'/%3E%3Ccircle cx='50' cy='50' r='38' fill='none' stroke='%23D4C4B0' stroke-width='0.6' opacity='0.5'/%3E%3Ctext font-family='DM Sans%2C sans-serif' font-size='9' font-weight='500' letter-spacing='2' fill='%23FDFAF6'%3E%3CtextPath href='%23circ'%3EOEKO-TEX %C2%B7 HECHO A MANO %C2%B7 %3C/textPath%3E%3C/text%3E%3Ctext x='50' y='55' text-anchor='middle' font-family='serif' font-size='22' fill='%23C17E5A'%3E%E2%9C%BF%3C/text%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  animation: boboo-badge-spin 18s linear infinite;
+  pointer-events: none;
+  z-index: 20;
+  filter: drop-shadow(0 3px 10px rgba(0, 0, 0, .25));
+}
+
+/* En móvil el badge vuelve al interior del panel */
+@media (max-width: 749px) {
+  .section--full-width .group-block.color-scheme-5::after {
+    width: 72px; height: 72px;
+    bottom: 1.2rem;
+    right: 1rem;
+  }
+}
+
+
+/* ───────────────────────────────────────────────────────
+   14. HERO — Bloque custom-liquid ".titulo"
+   Se usa en el bloque de custom-liquid del hero.
+   La clase .titulo se asigna en el HTML del bloque.
+   ─────────────────────────────────────────────────────── */
+.titulo {
+  font-family: var(--boboo-font-display);
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  font-weight: 300;
+  line-height: 1.15;
+  margin: 0 0 1.2rem;
+  color: var(--boboo-carbon);
+}
+
+.titulo span {
+  color: var(--boboo-sage);
+  font-style: italic;
+}
+
+/* Subtítulo del hero custom */
+.subtitulo {
+  font-family: var(--boboo-font-body);
+  font-size: clamp(.9rem, 1.8vw, 1.05rem);
+  font-weight: 300;
+  line-height: 1.65;
+  color: var(--boboo-muted);
+  max-width: 36ch;
+  margin: 0 0 2rem;
+}
+
+/* Etiqueta artesanal encima del título */
+.boboo-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  font-family: var(--boboo-font-body);
+  font-size: .7rem;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--boboo-terracota);
+  font-weight: 500;
+  margin-bottom: 1.2rem;
+}
+
+.boboo-eyebrow::before,
+.boboo-eyebrow::after {
+  content: '';
+  display: inline-block;
+  width: 24px; height: 1px;
+  background: var(--boboo-terracota);
+  opacity: .6;
+}
+
+@media (max-width: 749px) {
+  .titulo {
+    font-size: 2rem;
+    text-align: center;
+  }
+  .subtitulo {
+    text-align: center;
+    max-width: 100%;
+  }
+  .boboo-eyebrow {
+    display: flex;
+    justify-content: center;
+  }
+}
+
+
+/* ───────────────────────────────────────────────────────
+   15. MARQUEE — Separadores y tipografía
+   ─────────────────────────────────────────────────────── */
+marquee-component .text-block.custom {
+  padding-inline: 1.5rem;
+  border-right: 1px solid rgba(255, 255, 255, .15);
+}
+marquee-component .marquee__repeated-items .text-block:last-child {
+  border-right: none;
+}
+
+
+/* ───────────────────────────────────────────────────────
+   16. ACCESIBILIDAD
+   ─────────────────────────────────────────────────────── */
+
+/* Foco visible en terracota para todos los elementos */
+*:focus-visible {
+  outline: 2px solid var(--boboo-terracota);
+  outline-offset: 3px;
+  border-radius: var(--boboo-radius-sm);
+}
+
+/* Respetar la preferencia de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  .boboo-reveal,
+  [data-boboo-header] .menu-list__link::after,
+  .button:not(.button-secondary, .button-unstyled, .quick-add__button)::before,
+  .button:not(.button-secondary, .button-unstyled, .quick-add__button)::after {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  /* Detener el badge y el marquee */
+  .section--full-width .group-block.color-scheme-5::after {
+    animation: none;
+  }
+
+  /* Ocultar cursor animado */
+  .boboo-cursor { display: none !important; }
+}
+
+
+
+/* ───────────────────────────────────────────────────────
+   17. BOTÓN PRIMARIO (.button) — Neumorphism + ola terracota
+   Afecta a TODOS los botones primarios de Horizon en toda la tienda.
+   Excluye: .button-secondary, .button-unstyled, .quick-add__button
+   (cada uno tiene su propio tratamiento)
+
+   AUDITORÍA base.css línea 1275: .button usa display:grid
+   El neumorphism funciona con display:grid porque los pseudo-
+   elementos son position:absolute — no participan en el grid.
+   ─────────────────────────────────────────────────────── */
+
+.button:not(.button-secondary, .button-unstyled, .quick-add__button) {
+  position: relative !important;
+  overflow: hidden !important;
+  z-index: 1;
+  /* Neumorphism suave sobre fondo claro */
+  background: #e8e8e8 !important;
+  color: #090909 !important;
+  border-radius: .5em !important;
+  box-shadow: 6px 6px 12px #c5c5c5, -6px -6px 12px #ffffff !important;
+  transition: color .2s ease-in, box-shadow .2s ease-in !important;
+}
+
+/* Estado activo (click) — sombra invertida */
+.button:not(.button-secondary, .button-unstyled, .quick-add__button):active {
+  color: #666 !important;
+  box-shadow: inset 4px 4px 12px #c5c5c5, inset -4px -4px 12px #ffffff !important;
+}
+
+/* Ola terracota — capa 1: oscurecimiento sutil */
+.button:not(.button-secondary, .button-unstyled, .quick-add__button)::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 140%;
+  height: 180%;
+  background: rgba(0, 0, 0, .05);
+  border-radius: 50%;
+  transform: translateX(-50%) scaleY(1) scaleX(1.25);
+  transition: all .5s .1s cubic-bezier(.55, 0, .1, 1);
+  z-index: -1;
+}
+
+/* Ola terracota — capa 2: color de marca */
+.button:not(.button-secondary, .button-unstyled, .quick-add__button)::after {
+  content: "";
+  position: absolute;
+  left: 55%;
+  top: 180%;
+  width: 160%;
+  height: 190%;
+  background: var(--boboo-terracota);
+  border-radius: 50%;
+  transform: translateX(-50%) scaleY(1) scaleX(1.45);
+  transition: all .5s .1s cubic-bezier(.55, 0, .1, 1);
+  z-index: -1;
+}
+
+/* Hover: texto blanco */
+.button:not(.button-secondary, .button-unstyled, .quick-add__button):hover {
+  color: #ffffff !important;
+}
+
+/* Hover: ola sube desde abajo */
+.button:not(.button-secondary, .button-unstyled, .quick-add__button):hover::before {
+  top: -35%;
+  background: var(--boboo-terracota);
+  transform: translateX(-50%) scaleY(1.3) scaleX(0.8);
+}
+
+.button:not(.button-secondary, .button-unstyled, .quick-add__button):hover::after {
+  top: -45%;
+  background: var(--boboo-terracota);
+  transform: translateX(-50%) scaleY(1.3) scaleX(0.8);
+}
+
+
+/* ───────────────────────────────────────────────────────
+   18. BOTÓN SECUNDARIO (.button-secondary) — Efecto jello
+   Animación elástica en hover. Los ::before y ::after
+   añaden un brillo sutil en la parte superior e inferior.
+   ─────────────────────────────────────────────────────── */
+
+@keyframes boboo-jello {
+  0%   { transform: scale3d(1, 1, 1); }
+  30%  { transform: scale3d(1.25, 0.75, 1); }
+  40%  { transform: scale3d(0.75, 1.25, 1); }
+  50%  { transform: scale3d(1.15, 0.85, 1); }
+  65%  { transform: scale3d(0.95, 1.05, 1); }
+  75%  { transform: scale3d(1.05, 0.95, 1); }
+  100% { transform: scale3d(1, 1, 1); }
+}
+
+.button-secondary {
+  position: relative;
+}
+
+/* Brillo superior */
+.button-secondary::before {
+  content: "";
+  width: 70%;
+  height: 2px;
+  position: absolute;
+  background: rgba(255, 255, 255, .5);
+  filter: blur(1px);
+  top: 6px;
+  left: 15%;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Brillo inferior */
+.button-secondary::after {
+  content: "";
+  width: 70%;
+  height: 2px;
+  position: absolute;
+  background: rgba(255, 255, 255, .15);
+  filter: blur(1px);
+  bottom: 6px;
+  left: 15%;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.button-secondary:hover {
+  animation: boboo-jello .9s both;
+}
+
+
+/* ───────────────────────────────────────────────────────
+   19. ENLACE (.link) — Doble línea que crece desde el centro
+   Afecta a todos los enlaces con clase .link en el tema.
+   Excluye los enlaces dentro de tarjetas de colección
+   (tienen su propio tratamiento en la sección 9).
+   ─────────────────────────────────────────────────────── */
+
+a.link:not(.collection-card__content .link) {
+  position: relative;
+  text-decoration: none;
+}
+
+a.link:not(.collection-card__content .link)::before,
+a.link:not(.collection-card__content .link)::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  width: 0%;
+  height: 1.5px;
+  background: var(--boboo-terracota);
+  transition: width .4s ease;
+}
+
+/* La línea izquierda crece hacia la izquierda desde el centro */
+a.link:not(.collection-card__content .link)::before { right: 50%; }
+/* La línea derecha crece hacia la derecha desde el centro */
+a.link:not(.collection-card__content .link)::after  { left: 50%; }
+
+a.link:not(.collection-card__content .link):hover::before,
+a.link:not(.collection-card__content .link):hover::after { width: 50%; }
+
+
+/* ───────────────────────────────────────────────────────
+   20. QUICK-ADD (.quick-add__button) — Botón ATC en tarjetas
+   Usa los colores Boboó en lugar del negro genérico de Horizon.
+   ─────────────────────────────────────────────────────── */
+
+.quick-add__button {
+  position: relative;
+  overflow: hidden;
+  background: var(--boboo-carbon) !important;
+  color: var(--boboo-white) !important;
+  transition: background .2s ease !important;
+}
+
+.quick-add__button:hover {
+  background: var(--boboo-terracota) !important;
+}
+
+/* En mobile el ATC usa rosa de marca */
+@media (max-width: 749px) {
+  .quick-add__button {
+    background: var(--boboo-rosa) !important;
+  }
+}
+
+/* Reducir movimiento — desactivar jello y ola */
+@media (prefers-reduced-motion: reduce) {
+  .button-secondary:hover { animation: none !important; }
+  .button:not(.button-secondary, .button-unstyled, .quick-add__button)::before,
+  .button:not(.button-secondary, .button-unstyled, .quick-add__button)::after {
+    transition: none !important;
+  }
+}
+
+
+/* ───────────────────────────────────────────────────────
+   21. EDITOR DE SHOPIFY — Compatibilidad con el iframe
+   ─────────────────────────────────────────────────────── */
+
+/* Cuando Shopify carga el tema en el editor (Personalizar),
+   el <html> recibe la clase .shopify-design-mode.
+   El IntersectionObserver de boboo-main.js está desactivado
+   en iframe (guardia window.self !== window.top), por lo que
+   los elementos .boboo-reveal quedan con opacity:0.
+   Este bloque los fuerza a visible SOLO dentro del editor,
+   sin afectar a la web real. */
+
+.shopify-design-mode .boboo-reveal,
+.shopify-design-mode .boboo-reveal.boboo-reveal--delay-1,
+.shopify-design-mode .boboo-reveal.boboo-reveal--delay-2,
+.shopify-design-mode .boboo-reveal.boboo-reveal--delay-3,
+.shopify-design-mode .boboo-reveal.boboo-reveal--delay-4 {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+/* Las animaciones de entrada del hero también quedan
+   bloqueadas en el editor — forzar visibilidad */
+.shopify-design-mode .boboo-hero__eyebrow,
+.shopify-design-mode .boboo-hero__title,
+.shopify-design-mode .boboo-hero__subtitle,
+.shopify-design-mode .boboo-hero__ctas {
+  opacity: 1 !important;
+  animation: none !important;
+  transform: none !important;
+}
+
+/* El badge del hero también */
+.shopify-design-mode .boboo-hero__badge-svg {
+  animation: none;
+}
+
+
+/* ───────────────────────────────────────────────────────
+   22. JUDGE.ME — Sobreescritura de estilos del widget
+   Las clases jdgm-* son las que inyecta la app Judge.me.
+   No tocamos la app, solo sobreescribimos su visual.
+   Se aplica a cualquier widget de Judge.me en la tienda.
+   ─────────────────────────────────────────────────────── */
+
+/* ── Contenedor principal del widget ── */
+.jdgm-widget {
+  font-family: var(--boboo-font-body, 'DM Sans', sans-serif) !important;
+  color: var(--boboo-carbon, #2A2520) !important;
+}
+
+/* ── Estrellas — color terracota en lugar del amarillo genérico ── */
+.jdgm-star,
+.jdgm-prev-badge__stars,
+.jdgm-rating-summary__stars {
+  color: var(--boboo-terracota, #C17E5A) !important;
+}
+
+/* ── Cards de reseña ── */
+.jdgm-rev-widg__body,
+.jdgm-rev,
+.jdgm-carousel-item,
+.jdgm-masonry-item {
+  background: var(--boboo-white, #FDFAF6) !important;
+  border: 1px solid var(--boboo-warm, #EDE3D8) !important;
+  border-radius: 4px !important;
+  box-shadow: none !important;
+  padding: 1.5rem !important;
+}
+
+/* ── Nombre del revisor ── */
+.jdgm-rev__author,
+.jdgm-rev__author-name {
+  font-family: var(--boboo-font-body, 'DM Sans', sans-serif) !important;
+  font-weight: 500 !important;
+  color: var(--boboo-carbon, #2A2520) !important;
+  font-size: .85rem !important;
+}
+
+/* ── Texto de la reseña ── */
+.jdgm-rev__body,
+.jdgm-rev__body p {
+  font-family: var(--boboo-font-body, 'DM Sans', sans-serif) !important;
+  font-size: .88rem !important;
+  color: var(--boboo-carbon, #2A2520) !important;
+  line-height: 1.75 !important;
+  font-weight: 300 !important;
+}
+
+/* ── Título de la reseña ── */
+.jdgm-rev__title {
+  font-family: var(--boboo-font-display, 'Cormorant Garamond', serif) !important;
+  font-size: 1rem !important;
+  font-weight: 400 !important;
+  color: var(--boboo-carbon, #2A2520) !important;
+  font-style: italic !important;
+}
+
+/* ── Fecha y badge verificado ── */
+.jdgm-rev__timestamp,
+.jdgm-rev__badge,
+.jdgm-rev-badge {
+  font-size: .72rem !important;
+  color: var(--boboo-muted, #8A7E74) !important;
+  letter-spacing: .04em !important;
+}
+
+/* ── Badge "Compra verificada" ── */
+.jdgm-rev__badge--verified-buyer {
+  color: var(--boboo-sage-dk, #5C8068) !important;
+  background: transparent !important;
+  border: 1px solid var(--boboo-sage, #7FA98B) !important;
+  border-radius: 2px !important;
+  padding: 1px 6px !important;
+}
+
+/* ── Cabecera del widget (puntuación global) ── */
+.jdgm-rating-summary {
+  font-family: var(--boboo-font-display, 'Cormorant Garamond', serif) !important;
+}
+
+.jdgm-rating-summary__average {
+  font-size: 3rem !important;
+  font-weight: 300 !important;
+  color: var(--boboo-carbon, #2A2520) !important;
+}
+
+/* ── Botones del widget ── */
+.jdgm-write-rev-link,
+.jdgm-paginate__page,
+.jdgm-carousel-dots .jdgm-carousel-dot {
+  color: var(--boboo-terracota, #C17E5A) !important;
+}
+
+.jdgm-carousel-dots .jdgm-carousel-dot--active {
+  background: var(--boboo-terracota, #C17E5A) !important;
+}
+
+/* ── Flechas del carrusel ── */
+.jdgm-carousel-arrow {
+  background: var(--boboo-white, #FDFAF6) !important;
+  border: 1px solid var(--boboo-sand, #D4C4B0) !important;
+  color: var(--boboo-carbon, #2A2520) !important;
+  border-radius: 50% !important;
+}
+
+.jdgm-carousel-arrow:hover {
+  background: var(--boboo-carbon, #2A2520) !important;
+  color: var(--boboo-white, #FDFAF6) !important;
+  border-color: var(--boboo-carbon, #2A2520) !important;
+}
+
+/* ── Sección de reseñas en página de producto ── */
+#shopify-section-product-reviews .jdgm-widget,
+.jdgm-rev-widg {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   PÁGINA DE PRODUCTO — Sesión 5
+   Clases auditadas directamente en sections/product-information.liquid
+   y blocks/variant-picker.liquid del tema Horizon.
+   Todo scoped bajo .product-section o selectores nativos de Horizon
+   para evitar colisiones con otras páginas.
+   ═══════════════════════════════════════════════════════════ */
+
+/* ───────────────────────────────────────────────────────
+   23. PRODUCTO — Tipografía y espaciado general
+   ─────────────────────────────────────────────────────── */
+
+/* Título del producto en Cormorant */
+.product-information product-title h1,
+.product-information .text-block h1,
+[data-testid="product-title"] {
+  font-family: var(--boboo-font-display) !important;
+  font-weight: 300 !important;
+  line-height: 1.1 !important;
+  font-size: clamp(1.8rem, 3vw, 2.8rem) !important;
+}
+
+/* Precio principal */
+.product-information .price__regular .price-item,
+.product-information .price__sale .price-item--sale {
+  font-family: var(--boboo-font-body);
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--boboo-carbon);
+}
+
+/* Precio tachado (antes de oferta) */
+.product-information .price__sale .price-item--regular {
+  font-size: .95rem;
+  color: var(--boboo-muted);
+  text-decoration: line-through;
+}
+
+/* Badge de oferta */
+.product-information .price__badge-sale,
+.product-information .badge--sale {
+  background: var(--boboo-terracota) !important;
+  color: var(--boboo-white) !important;
+  border-radius: 2px !important;
+  font-size: .7rem !important;
+  font-weight: 500 !important;
+  letter-spacing: .06em !important;
+}
+
+/* Badge agotado */
+.product-information .price__badge-sold-out,
+.product-information .badge--sold-out {
+  background: var(--boboo-muted) !important;
+  color: var(--boboo-white) !important;
+  border-radius: 2px !important;
+}
+
+
+/* ───────────────────────────────────────────────────────
+   24. PRODUCTO — Selector de variantes (tallas)
+   Clases auditadas: variant-picker usa custom elements
+   con botones internos. Las variables CSS de variantes
+   ya están en :root desde boboo-custom.css sección 1.
+   ─────────────────────────────────────────────────────── */
+
+/* Botón de talla — base */
+variant-picker .variant-input-wrapper label,
+variant-picker fieldset label {
+  font-family: var(--boboo-font-body) !important;
+  font-size: .8rem !important;
+  font-weight: 400 !important;
+  border-radius: 2px !important;
+  min-width: 44px !important;
+  text-align: center !important;
+  transition:
+    background var(--boboo-t-fast),
+    border-color var(--boboo-t-fast),
+    color var(--boboo-t-fast) !important;
+}
+
+/* Talla agotada — tachada */
+variant-picker .variant-input-wrapper input:disabled + label,
+variant-picker .variant-input-wrapper label.disabled {
+  opacity: .45 !important;
+  text-decoration: line-through !important;
+  cursor: not-allowed !important;
+}
+
+/* Label sobre las opciones de variante */
+variant-picker .variant__label,
+variant-picker .form__label {
+  font-family: var(--boboo-font-body) !important;
+  font-size: .78rem !important;
+  font-weight: 500 !important;
+  letter-spacing: .06em !important;
+  text-transform: uppercase !important;
+  color: var(--boboo-carbon) !important;
+}
+
+
+/* ───────────────────────────────────────────────────────
+   25. PRODUCTO — Botón "Añadir al carrito" (ATC)
+   El botón ATC usa la clase .button nativa de Horizon,
+   que ya tiene el efecto ola de la sección 17.
+   Aquí solo ajustamos tamaño y espaciado en contexto de producto.
+   ─────────────────────────────────────────────────────── */
+
+.product-information .button:not(.button-secondary, .button-unstyled) {
+  width: 100% !important;
+  padding: 1.1rem 2rem !important;
+  font-size: .8rem !important;
+  letter-spacing: .12em !important;
+}
+
+
+/* ───────────────────────────────────────────────────────
+   26. PRODUCTO — Sticky ATC bar
+   Horizon ya tiene sticky-add-to-cart.js y el elemento
+   sticky-add-to-cart. Solo sobreescribimos colores y fuente.
+   ─────────────────────────────────────────────────────── */
+
+.sticky-add-to-cart__bar {
+  background: rgba(var(--boboo-cream-rgb), .97) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-top: 1px solid var(--boboo-sand) !important;
+  box-shadow: 0 -4px 20px rgba(var(--boboo-carbon-rgb), .08) !important;
+}
+
+.sticky-add-to-cart__title {
+  font-family: var(--boboo-font-display) !important;
+  font-weight: 400 !important;
+  font-size: 1rem !important;
+  color: var(--boboo-carbon) !important;
+}
+
+.sticky-add-to-cart__variant,
+.sticky-add-to-cart__price {
+  font-family: var(--boboo-font-body) !important;
+  font-size: .82rem !important;
+  color: var(--boboo-muted) !important;
+}
+
+/* Botón ATC del sticky — siempre en terracota */
+.sticky-add-to-cart__button.button {
+  background: var(--boboo-carbon) !important;
+  color: var(--boboo-white) !important;
+  font-size: .75rem !important;
+  letter-spacing: .1em !important;
+  padding: .75rem 1.5rem !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+}
+
+.sticky-add-to-cart__button.button:hover {
+  background: var(--boboo-terracota) !important;
+}
+
+
+/* ───────────────────────────────────────────────────────
+   27. PRODUCTO — Mini trust signals
+   Bloque custom-liquid debajo del ATC con garantías rápidas.
+   Clase: .boboo-product-trust (añadida via custom-liquid block)
+   ─────────────────────────────────────────────────────── */
+
+.boboo-product-trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem 1.2rem;
+  padding: 1rem 0;
+  border-top: 1px solid var(--boboo-warm);
+  border-bottom: 1px solid var(--boboo-warm);
+  margin: 1rem 0;
+}
+
+.boboo-product-trust__item {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  font-family: var(--boboo-font-body);
+  font-size: .72rem;
+  color: var(--boboo-muted);
+  letter-spacing: .03em;
+}
+
+.boboo-product-trust__item strong {
+  color: var(--boboo-carbon);
+  font-weight: 500;
+}
+
+
+/* ───────────────────────────────────────────────────────
+   28. PRODUCTO — Galería de imágenes
+   Pequeños ajustes visuales sobre la galería nativa de Horizon
+   sin tocar su lógica JS (swap de imagen, zoom, etc.)
+   ─────────────────────────────────────────────────────── */
+
+/* Radio en la imagen principal */
+.product-media-gallery .media,
+.media-gallery__media {
+  border-radius: var(--boboo-radius-md) !important;
+  overflow: hidden !important;
+}
+
+/* Thumbnails — borde active en terracota */
+.product-media-gallery .thumbnail-list__item button[aria-current="true"],
+.product-media-gallery .thumbnail-list__item button:focus-visible {
+  border-color: var(--boboo-terracota) !important;
+  border-width: 2px !important;
+}
+
+
+/* ───────────────────────────────────────────────────────
+   29. PRODUCTO — Sección de recomendaciones "También te puede gustar"
+   Traduce el título al español y aplica tipografía Boboó.
+   ─────────────────────────────────────────────────────── */
+
+.product-recommendations .text-block h2,
+.product-recommendations .text-block h3 {
+  font-family: var(--boboo-font-display) !important;
+  font-weight: 300 !important;
+  font-size: clamp(1.4rem, 2.5vw, 2rem) !important;
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   FOOTER — Sesión 5
+   El footer de Horizon usa color-scheme para el fondo.
+   Sobreescribimos tipografía, links y separadores.
+   ═══════════════════════════════════════════════════════════ */
+
+/* ───────────────────────────────────────────────────────
+   30. FOOTER — Tipografía y colores generales
+   ─────────────────────────────────────────────────────── */
+
+.footer-content {
+  font-family: var(--boboo-font-body) !important;
+}
+
+/* Títulos de columna (menús, "Síguenos", etc.) */
+.footer-content .menu__heading,
+.footer-content .menu__heading__default,
+.footer-content h3,
+.footer-content h4 {
+  font-family: var(--boboo-font-display) !important;
+  font-weight: 300 !important;
+  font-size: 1.1rem !important;
+  letter-spacing: .02em !important;
+  margin-bottom: 1rem !important;
+}
+
+/* Links del footer */
+.footer-content a:not(.button) {
+  font-size: .82rem !important;
+  line-height: 2 !important;
+  transition: color var(--boboo-t-fast) !important;
+  text-decoration: none !important;
+}
+
+.footer-content a:not(.button):hover {
+  color: var(--boboo-terracota) !important;
+}
+
+/* Texto de copyright y políticas */
+.footer-utilities .footer__copyright,
+.footer-utilities p,
+.footer-utilities span {
+  font-family: var(--boboo-font-body) !important;
+  font-size: .72rem !important;
+  letter-spacing: .03em !important;
+}
+
+/* Separador entre footer principal y utilities */
+.footer-utilities {
+  border-top: 1px solid rgba(var(--boboo-sand-rgb), .3) !important;
+}
+
+/* Links de política en footer utilities */
+.footer-utilities a {
+  font-size: .72rem !important;
+  text-decoration: none !important;
+  transition: color var(--boboo-t-fast) !important;
+}
+
+.footer-utilities a:hover {
+  color: var(--boboo-terracota) !important;
+}
+
+
+/* ───────────────────────────────────────────────────────
+   31. FOOTER — Iconos sociales
+   ─────────────────────────────────────────────────────── */
+
+.footer-content .social-icons__link,
+.social-icons .icon-wrapper {
+  transition:
+    color var(--boboo-t-fast),
+    transform var(--boboo-t-fast) !important;
+}
+
+.footer-content .social-icons__link:hover,
+.social-icons .icon-wrapper:hover {
+  color: var(--boboo-terracota) !important;
+  transform: translateY(-2px) !important;
+}
+
+
+/* ───────────────────────────────────────────────────────
+   32. SHOPIFY DESIGN MODE — fix adicional para producto
+   ─────────────────────────────────────────────────────── */
+
+.shopify-design-mode .sticky-add-to-cart {
+  display: none !important; /* El sticky ATC no tiene sentido en el editor */
+}
+
+.shopify-design-mode .boboo-product-trust {
+  opacity: 1 !important;
+}

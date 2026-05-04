@@ -1,0 +1,148 @@
+{% style %}
+
+	.nav-header {
+		margin:1rem 2rem;
+		text-align:center;
+		color: {{section.settings.title-color }};
+	}
+
+
+	.container {
+		display:flex;
+		justify-content:space-around;
+        max-width: 120rem;
+        margin: 0 auto;
+        padding: 0 5rem;
+    }
+
+	
+	.list-no-bullet
+	{
+		list-style-type: none;
+		color: {{section.settings.list-title-color }};
+		font-size: {{ section.settings.list-title-font-size }}px;
+	}
+
+	.link-item {
+		text-decoration: none;
+		color: {{section.settings.link-color}};
+		font-size: {{ section.settings.link-font-size }}px;
+		line-height:1;
+	}
+
+	.li-item { line-height: {{section.settings.link-line-height}} }
+
+	@media (max-width: 768px) {
+		.container	{
+			padding:0;
+			flex-wrap:wrap;
+		}
+		.list-no-bullet {
+			flex: 1 1 50%;
+		}
+			
+	}
+
+{% endstyle %}
+
+<div style="padding:2rem 0;background-color:{{ section.settings.background-color }}">
+    <h1 class="nav-header"> {{ section.settings.navigation_title }} </h1>
+	<div class="container">
+    {%- for block in section.blocks -%}
+  	<ul class="list-no-bullet">
+      {{ block.settings.link_id.title }}
+      {% for link in linklists[block.settings.link_id].links %}
+      	<li class="li-item"><a class="link-item" href="{{ link.url }}">{{ link.title }}</a></li>
+      {% endfor %}
+    </ul>
+    {%- endfor -%}
+      
+  </div>
+</div>
+{% schema %}
+  {
+    "name": "Navigation #1",
+	"tag": "section",
+	"class": "navigation-type1",
+    "settings": [
+		{
+		  "type": "text",
+          "id": "navigation_title",
+          "label": "Navigation title",
+          "default": "Menu"
+		},
+		{
+          "type":"color",
+          "id": "title-color",
+          "label": "Header color",
+          "default": "#121212"
+		},
+		{
+          "type":"color",
+          "id": "list-title-color",
+          "label": "List title color",
+          "default": "#121212"
+		},
+        {
+          "type":"color",
+          "id": "background-color",
+          "label": "Background color"
+		},
+		{
+          "type":"range",
+          "id": "list-title-font-size",
+          "label": "List title font-size",
+		  "min": 8,
+		  "max": 30,
+          "default": 16
+		},
+		{
+          "type":"color",
+          "id": "link-color",
+          "label": "Link color",
+          "default": "#06c"
+		},
+		{
+          "type":"range",
+          "id": "link-font-size",
+          "label": "Link font-size",
+		  "min": 8,
+		  "max": 30,
+          "default": 16
+		},
+		{
+          "type":"range",
+          "id": "link-line-height",
+          "label": "Link line-height",
+		  "step": 0.2,
+		  "min": 1,
+		  "max": 3,
+          "default": 1.6
+		}
+
+	],
+	"blocks": [
+	  {
+		"name":"Navigation item",
+		"type":"navigation",
+		"settings": [
+          {
+              "type": "link_list",
+              "id": "link_id",
+              "label": "Navigation list"
+          }
+		]
+	  }
+	],
+	"presets": [
+    {
+        "name": "Navigation #1"
+	}
+	]
+  }
+{% endschema %}
+
+
+
+{% javascript %}
+{% endjavascript %}

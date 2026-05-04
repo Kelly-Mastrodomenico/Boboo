@@ -1,0 +1,160 @@
+{%- comment -%}
+  BOBOÓ — Barra de confianza
+  Sesión 2 (corregida Sesión 3) — Sección custom
+{%- endcomment -%}
+
+<div class="boboo-trust-wrap" data-color="{{ section.settings.bg_color | default: 'carbon' }}">
+
+  <div class="boboo-trust__divider" aria-hidden="true">
+    <svg viewBox="0 0 1440 48" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,48 L0,24 Q360,0 720,24 Q1080,48 1440,24 L1440,48 Z" fill="currentColor"/>
+    </svg>
+  </div>
+
+  <section class="boboo-trust" aria-label="Compromisos de la tienda">
+    <div class="boboo-trust__inner">
+
+      {%- for block in section.blocks -%}
+        <div class="boboo-trust__item" {{ block.shopify_attributes }}>
+          <span class="boboo-trust__icon" aria-hidden="true">{{ block.settings.icon }}</span>
+          <span class="boboo-trust__text">{{ block.settings.text }}</span>
+        </div>
+      {%- else -%}
+        <div class="boboo-trust__item">
+          <span class="boboo-trust__icon" aria-hidden="true">🧵</span>
+          <span class="boboo-trust__text">Hecho a mano en España</span>
+        </div>
+        <div class="boboo-trust__item">
+          <span class="boboo-trust__icon" aria-hidden="true">🌿</span>
+          <span class="boboo-trust__text">Certificado OEKO-TEX</span>
+        </div>
+        <div class="boboo-trust__item">
+          <span class="boboo-trust__icon" aria-hidden="true">📦</span>
+          <span class="boboo-trust__text">Envío gratis desde 60€</span>
+        </div>
+        <div class="boboo-trust__item">
+          <span class="boboo-trust__icon" aria-hidden="true">↩️</span>
+          <span class="boboo-trust__text">30 días de devolución</span>
+        </div>
+        <div class="boboo-trust__item">
+          <span class="boboo-trust__icon" aria-hidden="true">⭐</span>
+          <span class="boboo-trust__text">+240 reseñas · 4,9★</span>
+        </div>
+      {%- endfor -%}
+
+    </div>
+  </section>
+
+</div>
+
+<style>
+  .boboo-trust-wrap {
+    color: var(--boboo-carbon, #2A2520);
+    position: relative;
+  }
+  .boboo-trust-wrap[data-color="terracota"] { color: var(--boboo-terracota, #C17E5A); }
+  .boboo-trust-wrap[data-color="terracota"] .boboo-trust { background: var(--boboo-terracota, #C17E5A); }
+
+  .boboo-trust__divider { display: block; line-height: 0; margin-bottom: -1px; }
+  .boboo-trust__divider svg { width: 100%; height: 48px; display: block; }
+
+  .boboo-trust { background: var(--boboo-carbon, #2A2520); padding: 1.4rem 2rem; }
+
+  .boboo-trust__inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0;
+  }
+
+  .boboo-trust__item {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    padding: .4rem 2rem;
+    font-family: var(--boboo-font-body, 'DM Sans', sans-serif);
+    font-size: .75rem;
+    font-weight: 400;
+    letter-spacing: .06em;
+    color: var(--boboo-sand, #D4C4B0);
+    text-transform: uppercase;
+    border-right: 1px solid rgba(212, 196, 176, .2);
+  }
+  .boboo-trust__item:last-child { border-right: none; }
+  .boboo-trust__icon { font-size: .95rem; opacity: .85; flex-shrink: 0; }
+
+  @media (max-width: 900px) { .boboo-trust__item { padding: .4rem 1.2rem; } }
+
+  @media (max-width: 640px) {
+    .boboo-trust__item {
+      padding: .5rem 1rem;
+      font-size: .7rem;
+      border-right: none;
+      border-bottom: 1px solid rgba(212, 196, 176, .1);
+      width: 50%;
+      justify-content: center;
+    }
+    .boboo-trust__item:nth-last-child(-n+2) { border-bottom: none; }
+    .boboo-trust__divider svg { height: 28px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .boboo-trust__item { animation: none !important; opacity: 1 !important; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Barra de confianza",
+  "tag": "div",
+  "class": "boboo-trust-section",
+  "max_blocks": 8,
+  "settings": [
+    {
+      "type": "select",
+      "id": "bg_color",
+      "label": "Color de fondo",
+      "options": [
+        { "value": "carbon",    "label": "Negro carbón (predeterminado)" },
+        { "value": "terracota", "label": "Terracota" }
+      ],
+      "default": "carbon"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Ítem de confianza",
+      "settings": [
+        {
+          "type": "text",
+          "id": "icon",
+          "label": "Emoji o símbolo",
+          "default": "🧵"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Texto del ítem",
+          "default": "Hecho a mano en España"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Barra de confianza BOBOÓ",
+      "blocks": [
+        { "type": "item", "settings": { "icon": "🧵", "text": "Hecho a mano en España" } },
+        { "type": "item", "settings": { "icon": "🌿", "text": "Certificado OEKO-TEX" } },
+        { "type": "item", "settings": { "icon": "📦", "text": "Envío gratis desde 60€" } },
+        { "type": "item", "settings": { "icon": "↩️", "text": "30 días de devolución" } },
+        { "type": "item", "settings": { "icon": "⭐", "text": "+240 reseñas · 4,9★" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,500 @@
+{%- comment -%}
+  BOBOÓ — Footer propio
+  Sección custom — sobrevive actualizaciones del tema
+
+  ESTRUCTURA:
+  · 4 columnas: marca | colecciones | sobre boboó | ayuda
+  · Columna de marca: logo (texto o imagen), descripción, redes sociales
+  · Columnas 2-4: menús de Shopify seleccionables desde el editor
+  · Barra inferior: copyright + métodos de pago (linklists nativo)
+  · Fondo: --boboo-carbon hardcodeado — no depende del color-scheme
+
+  EDICIÓN DESDE EL ADMIN:
+  Admin → Personalizar → Footer → "Footer BOBOÓ"
+  · Cambiar logo, descripción y redes sociales en la columna de marca
+  · Seleccionar menú Shopify para cada columna con el campo menu_picker
+  · Activar/desactivar métodos de pago
+{%- endcomment -%}
+
+{%- liquid
+  assign logo_image     = section.settings.logo_image
+  assign brand_desc     = section.settings.brand_description | default: 'Ropa infantil hecha a mano en España. Unisex, sin estereotipos, con telas certificadas OEKO-TEX.'
+  assign col2_title     = section.settings.col2_title | default: 'Colecciones'
+  assign col2_menu      = section.settings.col2_menu
+  assign col3_title     = section.settings.col3_title | default: 'Sobre Boboó'
+  assign col3_menu      = section.settings.col3_menu
+  assign col4_title     = section.settings.col4_title | default: 'Ayuda'
+  assign col4_menu      = section.settings.col4_menu
+  assign show_payments  = section.settings.show_payment_icons
+  assign ig_url         = section.settings.social_instagram
+  assign fb_url         = section.settings.social_facebook
+  assign pi_url         = section.settings.social_pinterest
+  assign tk_url         = section.settings.social_tiktok
+  assign yt_url         = section.settings.social_youtube
+-%}
+
+<footer class="boboo-footer" id="boboo-footer" aria-label="Pie de página">
+
+  {%- comment -%} ── Grid de 4 columnas ── {%- endcomment -%}
+  <div class="boboo-footer__grid">
+
+    {%- comment -%} Columna 1 — Marca {%- endcomment -%}
+    <div class="boboo-footer__brand">
+
+      {%- comment -%} Logo — imagen si se sube, texto si no {%- endcomment -%}
+      <a href="{{ routes.root_url }}" class="boboo-footer__logo" aria-label="BOBOÓ — Inicio">
+        {%- if logo_image != blank -%}
+          <img
+            src="{{ logo_image | image_url: width: 160 }}"
+            alt="{{ shop.name }}"
+            width="120"
+            height="auto"
+            loading="lazy"
+            class="boboo-footer__logo-img"
+          >
+        {%- else -%}
+          <span class="boboo-footer__logo-text">{{ shop.name }}</span>
+        {%- endif -%}
+      </a>
+
+      <p class="boboo-footer__desc">{{ brand_desc }}</p>
+
+      {%- comment -%} Redes sociales {%- endcomment -%}
+      <div class="boboo-footer__social" aria-label="Redes sociales">
+        {%- if ig_url != blank -%}
+          <a href="{{ ig_url }}" class="boboo-footer__social-link" aria-label="Instagram" target="_blank" rel="noopener">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+          </a>
+        {%- endif -%}
+        {%- if fb_url != blank -%}
+          <a href="{{ fb_url }}" class="boboo-footer__social-link" aria-label="Facebook" target="_blank" rel="noopener">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+          </a>
+        {%- endif -%}
+        {%- if pi_url != blank -%}
+          <a href="{{ pi_url }}" class="boboo-footer__social-link" aria-label="Pinterest" target="_blank" rel="noopener">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>
+          </a>
+        {%- endif -%}
+        {%- if tk_url != blank -%}
+          <a href="{{ tk_url }}" class="boboo-footer__social-link" aria-label="TikTok" target="_blank" rel="noopener">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.83a8.18 8.18 0 0 0 4.78 1.52V6.9a4.85 4.85 0 0 1-1.01-.21z"/></svg>
+          </a>
+        {%- endif -%}
+        {%- if yt_url != blank -%}
+          <a href="{{ yt_url }}" class="boboo-footer__social-link" aria-label="YouTube" target="_blank" rel="noopener">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>
+          </a>
+        {%- endif -%}
+      </div>
+    </div>
+
+    {%- comment -%} Columnas 2-4 — Menús {%- endcomment -%}
+    {%- assign cols = 'col2,col3,col4' | split: ',' -%}
+    {%- assign titles = col2_title | append: '|' | append: col3_title | append: '|' | append: col4_title | split: '|' -%}
+    {%- assign menus = col2_menu | append: '---' | append: col3_menu | append: '---' | append: col4_menu -%}
+
+    {%- comment -%} Columna 2 — Colecciones {%- endcomment -%}
+    <div class="boboo-footer__col">
+      <p class="boboo-footer__col-title">{{ col2_title }}</p>
+      {%- if col2_menu != blank -%}
+        <ul class="boboo-footer__menu" role="list">
+          {%- for link in col2_menu.links -%}
+            <li class="boboo-footer__menu-item">
+              <a href="{{ link.url }}" class="boboo-footer__menu-link">{{ link.title }}</a>
+            </li>
+          {%- endfor -%}
+        </ul>
+      {%- else -%}
+        <p class="boboo-footer__menu-placeholder">Selecciona un menú en el editor →</p>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} Columna 3 — Sobre Boboó {%- endcomment -%}
+    <div class="boboo-footer__col">
+      <p class="boboo-footer__col-title">{{ col3_title }}</p>
+      {%- if col3_menu != blank -%}
+        <ul class="boboo-footer__menu" role="list">
+          {%- for link in col3_menu.links -%}
+            <li class="boboo-footer__menu-item">
+              <a href="{{ link.url }}" class="boboo-footer__menu-link">{{ link.title }}</a>
+            </li>
+          {%- endfor -%}
+        </ul>
+      {%- else -%}
+        <p class="boboo-footer__menu-placeholder">Selecciona un menú en el editor →</p>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} Columna 4 — Ayuda {%- endcomment -%}
+    <div class="boboo-footer__col">
+      <p class="boboo-footer__col-title">{{ col4_title }}</p>
+      {%- if col4_menu != blank -%}
+        <ul class="boboo-footer__menu" role="list">
+          {%- for link in col4_menu.links -%}
+            <li class="boboo-footer__menu-item">
+              <a href="{{ link.url }}" class="boboo-footer__menu-link">{{ link.title }}</a>
+            </li>
+          {%- endfor -%}
+        </ul>
+      {%- else -%}
+        <p class="boboo-footer__menu-placeholder">Selecciona un menú en el editor →</p>
+      {%- endif -%}
+    </div>
+
+  </div>
+
+  {%- comment -%} ── Barra inferior ── {%- endcomment -%}
+  <div class="boboo-footer__bottom">
+
+    <p class="boboo-footer__copyright">
+      &copy; {{ 'now' | date: '%Y' }} {{ shop.name }}
+      &middot; <a href="https://www.shopify.com" target="_blank" rel="noopener" class="boboo-footer__shopify-link">Tecnología de Shopify</a>
+    </p>
+
+    {%- comment -%} Métodos de pago — Shopify los detecta automáticamente {%- endcomment -%}
+    {%- if show_payments and shop.enabled_payment_types != empty -%}
+      <ul class="boboo-footer__payments" aria-label="Métodos de pago aceptados" role="list">
+        {%- for type in shop.enabled_payment_types -%}
+          <li class="boboo-footer__payment-item">
+            {{ type | payment_type_svg_tag: scale: 1 }}
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+  </div>
+
+</footer>
+
+<style>
+  /* ──────────────────────────────────────────────────────
+     BOBOÓ FOOTER — Estilos embebidos en la sección
+     Prefijo: .boboo-footer__ — cero colisiones con Horizon
+  ────────────────────────────────────────────────────── */
+
+  .boboo-footer {
+    background: var(--boboo-carbon, #2A2520);
+    padding: 5rem 2rem 0;
+    border-top: 3px solid var(--boboo-terracota, #C17E5A);
+  }
+
+  /* ── Grid 4 columnas ── */
+  .boboo-footer__grid {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.6fr 1fr 1fr 1fr;
+    gap: 3rem;
+    padding-bottom: 4rem;
+    border-bottom: 1px solid rgba(255, 255, 255, .07);
+  }
+
+  /* ── Columna de marca ── */
+  .boboo-footer__logo {
+    display: inline-block;
+    text-decoration: none;
+    margin-bottom: 1.4rem;
+  }
+
+  .boboo-footer__logo-text {
+    font-family: var(--boboo-font-display, 'Cormorant Garamond', serif);
+    font-size: 1.8rem;
+    font-weight: 300;
+    color: var(--boboo-cream, #F5EFE6);
+    letter-spacing: .04em;
+  }
+
+  .boboo-footer__logo-img {
+    max-width: 130px;
+    height: auto;
+    /* Invertir si el logo es oscuro — quitar si el logo es claro */
+    filter: brightness(0) invert(1);
+    opacity: .85;
+  }
+
+  .boboo-footer__desc {
+    font-family: var(--boboo-font-body, 'DM Sans', sans-serif);
+    font-size: .83rem;
+    line-height: 1.85;
+    color: rgba(253, 250, 246, .4);
+    max-width: 240px;
+    margin: 0 0 1.8rem;
+  }
+
+  /* ── Redes sociales ── */
+  .boboo-footer__social {
+    display: flex;
+    gap: .7rem;
+  }
+
+  .boboo-footer__social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border: 1px solid rgba(212, 196, 176, .2);
+    border-radius: 50%;
+    color: rgba(253, 250, 246, .45);
+    text-decoration: none;
+    transition:
+      color .2s ease,
+      border-color .2s ease,
+      transform .2s ease;
+  }
+
+  .boboo-footer__social-link:hover {
+    color: var(--boboo-terracota, #C17E5A);
+    border-color: var(--boboo-terracota, #C17E5A);
+    transform: translateY(-2px);
+  }
+
+  /* ── Columnas de menú ── */
+  .boboo-footer__col-title {
+    font-family: var(--boboo-font-body, 'DM Sans', sans-serif);
+    font-size: .7rem;
+    font-weight: 500;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--boboo-sand, #D4C4B0);
+    margin: 0 0 1.3rem;
+  }
+
+  .boboo-footer__menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: .1rem;
+  }
+
+  .boboo-footer__menu-link {
+    font-family: var(--boboo-font-body, 'DM Sans', sans-serif);
+    font-size: .83rem;
+    color: rgba(253, 250, 246, .45);
+    text-decoration: none;
+    display: block;
+    padding-block: .3rem;
+    transition: color .2s ease;
+  }
+
+  .boboo-footer__menu-link:hover {
+    color: var(--boboo-cream, #F5EFE6);
+  }
+
+  .boboo-footer__menu-placeholder {
+    font-size: .75rem;
+    color: rgba(253, 250, 246, .2);
+    font-style: italic;
+  }
+
+  /* ── Barra inferior ── */
+  .boboo-footer__bottom {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.4rem 0 1.8rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .boboo-footer__shopify-link {
+    color: rgba(255, 255, 255, .22);
+    text-decoration: none;
+    transition: color .2s ease;
+  }
+  .boboo-footer__shopify-link:hover {
+    color: rgba(255, 255, 255, .5);
+  }
+
+  .boboo-footer__copyright {
+    font-family: var(--boboo-font-body, 'DM Sans', sans-serif);
+    font-size: .72rem;
+    color: rgba(255, 255, 255, .22);
+    margin: 0;
+  }
+
+  /* ── Iconos de pago ── */
+  .boboo-footer__payments {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    flex-wrap: wrap;
+  }
+
+  .boboo-footer__payment-item svg,
+  .boboo-footer__payment-item img {
+    height: 22px;
+    width: auto;
+    opacity: .5;
+    filter: grayscale(1) brightness(2);
+    transition: opacity .2s ease;
+  }
+
+  .boboo-footer__payment-item:hover svg,
+  .boboo-footer__payment-item:hover img {
+    opacity: .8;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .boboo-footer__grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 2.5rem;
+    }
+
+    .boboo-footer__brand {
+      grid-column: 1 / -1;
+    }
+
+    .boboo-footer__desc { max-width: 100%; }
+  }
+
+  @media (max-width: 540px) {
+    .boboo-footer {
+      padding: 3.5rem 1.5rem 0;
+    }
+
+    .boboo-footer__grid {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    .boboo-footer__bottom {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+
+  /* ── Accesibilidad ── */
+  @media (prefers-reduced-motion: reduce) {
+    .boboo-footer__social-link { transition: none; }
+    .boboo-footer__menu-link   { transition: none; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Footer BOBOÓ",
+  "tag": "div",
+  "class": "boboo-footer-wrapper",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Columna de marca"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo_image",
+      "label": "Logo (imagen)",
+      "info": "Si no se selecciona imagen, se muestra el nombre de la tienda en tipografía Cormorant."
+    },
+    {
+      "type": "textarea",
+      "id": "brand_description",
+      "label": "Descripción de la marca",
+      "default": "Ropa infantil hecha a mano en España. Unisex, sin estereotipos, con telas certificadas OEKO-TEX."
+    },
+    {
+      "type": "header",
+      "content": "Redes sociales"
+    },
+    {
+      "type": "url",
+      "id": "social_instagram",
+      "label": "Instagram"
+    },
+    {
+      "type": "url",
+      "id": "social_facebook",
+      "label": "Facebook"
+    },
+    {
+      "type": "url",
+      "id": "social_pinterest",
+      "label": "Pinterest"
+    },
+    {
+      "type": "url",
+      "id": "social_tiktok",
+      "label": "TikTok"
+    },
+    {
+      "type": "url",
+      "id": "social_youtube",
+      "label": "YouTube"
+    },
+    {
+      "type": "header",
+      "content": "Columna 2"
+    },
+    {
+      "type": "text",
+      "id": "col2_title",
+      "label": "Título columna 2",
+      "default": "Colecciones"
+    },
+    {
+      "type": "link_list",
+      "id": "col2_menu",
+      "label": "Menú columna 2",
+      "info": "Selecciona el menú de Shopify que creaste en Admin → Navegación."
+    },
+    {
+      "type": "header",
+      "content": "Columna 3"
+    },
+    {
+      "type": "text",
+      "id": "col3_title",
+      "label": "Título columna 3",
+      "default": "Sobre Boboó"
+    },
+    {
+      "type": "link_list",
+      "id": "col3_menu",
+      "label": "Menú columna 3",
+      "info": "Selecciona el menú de Shopify que creaste en Admin → Navegación."
+    },
+    {
+      "type": "header",
+      "content": "Columna 4"
+    },
+    {
+      "type": "text",
+      "id": "col4_title",
+      "label": "Título columna 4",
+      "default": "Ayuda"
+    },
+    {
+      "type": "link_list",
+      "id": "col4_menu",
+      "label": "Menú columna 4",
+      "info": "Selecciona el menú de Shopify que creaste en Admin → Navegación."
+    },
+    {
+      "type": "header",
+      "content": "Barra inferior"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_payment_icons",
+      "label": "Mostrar iconos de métodos de pago",
+      "default": true,
+      "info": "Shopify detecta automáticamente los métodos de pago activados en la tienda."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Footer BOBOÓ"
+    }
+  ]
+}
+{% endschema %}

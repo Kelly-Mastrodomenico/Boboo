@@ -1,0 +1,615 @@
+<div class="section-{{ section.id }} animation-controller-{{ section.id }}">
+</div>
+
+<style>
+  .animate-fade-up {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  
+  .animate-fade-down {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  
+  .animate-fade-left {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  
+  .animate-fade-right {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  
+  .animate-fade {
+    opacity: 0;
+  }
+  
+  .animate-scale {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  
+  .animate-zoom {
+    opacity: 0;
+    transform: scale(1.1);
+  }
+  
+  .animate-blur {
+    opacity: 0;
+    filter: blur(10px);
+  }
+
+  /* Hover Animation Styles */
+  .hover-zoom img,
+  .hover-zoom svg {
+    transition: transform 0.4s ease, filter 0.4s ease;
+  }
+  
+  .hover-zoom img:hover,
+  .hover-zoom svg:hover {
+    transform: scale(1.1);
+  }
+  
+  .hover-lift img,
+  .hover-lift svg {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .hover-lift img:hover,
+  .hover-lift svg:hover {
+    transform: translateY(-10px);
+  }
+  
+  .hover-glow img,
+  .hover-glow svg {
+    transition: filter 0.3s ease, transform 0.3s ease;
+  }
+  
+  .hover-glow img:hover,
+  .hover-glow svg:hover {
+    filter: brightness(1.2) drop-shadow(0 0 20px rgba(255, 255, 255, 0.5));
+    transform: scale(1.05);
+  }
+
+  .hover-point-zoom img,
+  .hover-point-zoom svg {
+    transition: all 0.25s ease 0s;
+  }
+
+  .hover-blur-zoom img,
+  .hover-blur-zoom svg {
+    transform: scale(1.25);
+    filter: blur(2px);
+    transition: all 0.8s ease 0s;
+  }
+
+  .hover-blur-zoom img:hover,
+  .hover-blur-zoom svg:hover {
+    transform: scale(1);
+    filter: blur(0px);
+    transition: all 0.8s ease 0s;
+  }
+
+  .hover-point-zoom img:hover,
+  .hover-point-zoom svg:hover {
+    transition: all 0.25s ease 0s;
+    transform: scale(2);
+  }
+
+  .hover-colorize img,
+  .hover-colorize svg {
+    filter: grayscale(100%);
+    transition: 1s ease-in-out;
+  }
+
+  .hover-colorize img:hover,
+  .hover-colorize svg:hover {
+    filter: grayscale(0%);
+    transform: scale(1.2);
+    transition: 1s ease-in-out;
+  }
+
+  .hover-flip img,
+  .hover-flip svg {
+    transition: 1s ease-in-out;
+    transform-style: preserve-3d;
+  }
+
+  .hover-flip img:hover,
+  .hover-flip svg:hover {
+    transition: 1s ease-in-out;
+    transform: rotateY(180deg);
+  }
+
+  .hover-rotate-scale img,
+  .hover-rotate-scale svg {
+    transition: 1s ease-in-out;
+  }
+
+  .hover-rotate-scale img:hover,
+  .hover-rotate-scale svg:hover {
+    transform: rotate(10deg) scale(1.25);
+    transition: 1s ease-in-out;
+  }
+  
+  .hover-rotate img,
+  .hover-rotate svg {
+    transition: transform 0.5s ease;
+  }
+  
+  .hover-brightness img,
+  .hover-brightness svg {
+    filter: brightness(50%);
+    transition: all 0.5s ease 0s;
+  }
+
+  .hover-brightness img:hover,
+  .hover-brightness svg:hover {
+    filter: brightness(100%);
+    transition: all 0.5s ease 0s;
+  }
+
+  .hover-rotate img:hover,
+  .hover-rotate svg:hover {
+    transform: rotate(360deg);
+  }
+  
+  .hover-slide img,
+  .hover-slide svg {
+    transition: transform 0.3s ease;
+  }
+  
+  .hover-slide img:hover,
+  .hover-slide svg:hover {
+    transform: translateX(10px);
+  }
+  
+  .hover-bounce img,
+  .hover-bounce svg {
+    transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+  
+  .hover-bounce img:hover,
+  .hover-bounce svg:hover {
+    transform: scale(1.1);
+  }
+  
+  .hover-grayscale img,
+  .hover-grayscale svg {
+    transition: filter 0.3s ease, transform 0.3s ease;
+    filter: grayscale(100%);
+  }
+  
+  .hover-grayscale img:hover,
+  .hover-grayscale svg:hover {
+    filter: grayscale(0%);
+    transform: scale(1.05);
+  }
+  
+  .hover-sepia img,
+  .hover-sepia svg {
+    transition: filter 0.3s ease, transform 0.3s ease;
+    filter: sepia(0%);
+  }
+  
+  .hover-sepia img:hover,
+  .hover-sepia svg:hover {
+    filter: sepia(80%);
+    transform: scale(1.05);
+  }
+</style>
+
+<script>
+  function initSectionsAnimation{{ section.id | replace: '-', '' }}() {
+    const currentContainer = document.querySelector('.animation-controller-{{ section.id }}');
+    const currentSectionElement = currentContainer ? currentContainer.closest('.shopify-section') : null;
+
+    if (!currentSectionElement) {
+        return; 
+    }
+
+    const animationScope = '{{ section.settings.animation_scope }}';
+    const animationType = '{{ section.settings.animation_type }}';
+    const animationDuration = {{ section.settings.animation_duration }};
+    const animationDelay = {{ section.settings.animation_delay }};
+    const animateOnce = {{ section.settings.animate_once }};
+    const animationOffset = {{ section.settings.animation_offset }};
+
+    // Hover animation settings
+    const useHoverAnimation = {{ section.settings.use_hover_animation }};
+    const hoverEffectType = '{{ section.settings.hover_effect_type }}';
+    const hoverMinSize = {{ section.settings.hover_min_size }};
+    const hoverMaxSize = {{ section.settings.hover_max_size }};
+
+    // Get sections to apply effects to (shared scope)
+    function getSectionsInScope() {
+      let sections = [];
+      
+      switch(animationScope) {
+        case 'all':
+          sections = Array.from(document.querySelectorAll('.shopify-section'));
+          break;
+          
+        case 'all_below':
+          let sectionBelow = currentSectionElement.nextElementSibling;
+          while (sectionBelow) {
+            if (sectionBelow.classList.contains('shopify-section')) {
+              sections.push(sectionBelow);
+            }
+            sectionBelow = sectionBelow.nextElementSibling;
+          }
+          break;
+          
+        case 'one_below':
+          let nextSection = currentSectionElement.nextElementSibling;
+          while (nextSection) {
+            if (nextSection.classList.contains('shopify-section')) {
+              sections.push(nextSection);
+              break;
+            }
+            nextSection = nextSection.nextElementSibling;
+          }
+          break;
+      }
+      
+      return sections;
+    }
+
+    const sectionsInScope = getSectionsInScope();
+
+    // === SCROLL ANIMATION ===
+    const observerOptions = {
+      root: null,
+      rootMargin: `0px 0px -${animationOffset}px 0px`,
+      threshold: 0.1 
+    };
+
+    const animatedSections = new Set();
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const sectionId = entry.target.dataset.animationId;
+        
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'none';
+          entry.target.style.filter = 'none';
+          
+          if (animateOnce) {
+            animatedSections.add(sectionId);
+          }
+        } else {
+          if (!animateOnce || !animatedSections.has(sectionId)) {
+            entry.target.style.opacity = '0';
+            
+            switch(animationType) {
+              case 'fade-up':
+                entry.target.style.transform = 'translateY(50px)';
+                break;
+              case 'fade-down':
+                entry.target.style.transform = 'translateY(-50px)';
+                break;
+              case 'fade-left':
+                entry.target.style.transform = 'translateX(-50px)';
+                break;
+              case 'fade-right':
+                entry.target.style.transform = 'translateX(50px)';
+                break;
+              case 'scale':
+                entry.target.style.transform = 'scale(0.9)';
+                break;
+              case 'zoom':
+                entry.target.style.transform = 'scale(1.1)';
+                break;
+              case 'blur':
+                entry.target.style.filter = 'blur(10px)';
+                break;
+            }
+          }
+        }
+      });
+    }, observerOptions);
+
+    sectionsInScope.forEach((section, index) => {
+      const delay = animationDelay * index;
+      section.style.transition = `all ${animationDuration}s ease ${delay}s`;
+      section.classList.add(`animate-${animationType}`);
+      section.dataset.animationId = `section-${section.dataset.sectionId || index}`;
+      observer.observe(section);
+    });
+
+    // === HOVER ANIMATION ===
+    if (useHoverAnimation) {
+      function getSizeOfElement(element) {
+        const rect = element.getBoundingClientRect();
+        return Math.max(rect.width, rect.height);
+      }
+
+      function applyHoverEffect(element) {
+        const size = getSizeOfElement(element);
+        
+        if (size >= hoverMinSize && size <= hoverMaxSize) {
+          const parent = element.parentElement;
+          if (!parent.classList.contains(`hover-${hoverEffectType}`)) {
+            parent.classList.add(`hover-${hoverEffectType}`);
+          }
+        }
+      }
+
+      function processSection(section) {
+        const images = section.querySelectorAll('img');
+        const svgs = section.querySelectorAll('svg');
+        
+        images.forEach(img => {
+          if (img.complete) {
+            applyHoverEffect(img);
+          } else {
+            img.addEventListener('load', () => applyHoverEffect(img));
+          }
+        });
+        
+        svgs.forEach(svg => applyHoverEffect(svg));
+      }
+
+      sectionsInScope.forEach(section => processSection(section));
+
+      // Observer for dynamically added images
+      const observerConfig = { childList: true, subtree: true };
+      const mutationObserver = new MutationObserver((mutations) => {
+        mutations.forEach(mutation => {
+          mutation.addedNodes.forEach(node => {
+            if (node.nodeType === 1) {
+              if (node.tagName === 'IMG' || node.tagName === 'SVG') {
+                applyHoverEffect(node);
+              }
+              const imgs = node.querySelectorAll?.('img, svg');
+              imgs?.forEach(el => applyHoverEffect(el));
+            }
+          });
+        });
+      });
+
+      sectionsInScope.forEach(section => mutationObserver.observe(section, observerConfig));
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSectionsAnimation{{ section.id | replace: '-', '' }});
+  } else {
+    initSectionsAnimation{{ section.id | replace: '-', '' }}();
+  }
+
+  if (Shopify.designMode) {
+    document.addEventListener('shopify:section:load', function(event) {
+      if (event.detail.sectionId === '{{ section.id }}') {
+        initSectionsAnimation{{ section.id | replace: '-', '' }}();
+      }
+    });
+  }
+</script>
+
+{% schema %}
+  {
+    "name": "SS - Animate section",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "✨ Make your store feel premium with smooth, elegant scroll & hover animations."
+      },
+      {
+        "type": "header",
+        "content": "Animation scope"
+      },
+      {
+        "type": "radio",
+        "id": "animation_scope",
+        "label": "Which section(s) to animate",
+        "options": [
+          {
+            "value": "all",
+            "label": "All sections on page"
+          },
+          {
+            "value": "all_below",
+            "label": "All sections below this"
+          },
+          {
+            "value": "one_below",
+            "label": "One section below this"
+          }
+        ],
+        "default": "all"
+      },
+      {
+        "type": "header",
+        "content": "Scroll animation"
+      },
+      {
+        "type": "select",
+        "id": "animation_type",
+        "label": "Type",
+        "options": [
+          {
+            "value": "fade-up",
+            "label": "Fade up"
+          },
+          {
+            "value": "fade-down",
+            "label": "Fade down"
+          },
+          {
+            "value": "fade-left",
+            "label": "Fade from left"
+          },
+          {
+            "value": "fade-right",
+            "label": "Fade from right"
+          },
+          {
+            "value": "fade",
+            "label": "Fade only"
+          },
+          {
+            "value": "scale",
+            "label": "Scale up"
+          },
+          {
+            "value": "zoom",
+            "label": "Zoom out"
+          },
+          {
+            "value": "blur",
+            "label": "Blur to focus"
+          }
+        ],
+        "default": "fade-up"
+      },
+      {
+        "type": "range",
+        "id": "animation_duration",
+        "min": 0.1,
+        "max": 2.0,
+        "step": 0.1,
+        "unit": "s",
+        "label": "Duration",
+        "default": 0.3
+      },
+      {
+        "type": "range",
+        "id": "animation_delay",
+        "min": 0,
+        "max": 1,
+        "step": 0.1,
+        "unit": "s",
+        "label": "Delay between sections",
+        "info": "If there are many sections, this makes them come in one after another",
+        "default": 0.1
+      },
+      {
+        "type": "range",
+        "id": "animation_offset",
+        "min": 0,
+        "max": 300,
+        "step": 50,
+        "unit": "px",
+        "label": "Trigger offset",
+        "info": "How far up the screen the section needs to be before it starts animating",
+        "default": 100
+      },
+      {
+        "type": "checkbox",
+        "id": "animate_once",
+        "label": "Animate once",
+        "info": "If off, section animates every time you scroll past it",
+        "default": true
+      },
+      {
+        "type": "header",
+        "content": "Image hover animations"
+      },
+      {
+        "type": "checkbox",
+        "id": "use_hover_animation",
+        "label": "Turn on hover animation",
+        "info": "Images (and SVG icons) will play a small animation on hover.",
+        "default": false
+      },
+      {
+        "type": "select",
+        "id": "hover_effect_type",
+        "label": "Animation style",
+        "options": [
+          {
+            "value": "zoom",
+            "label": "Zoom - scale up"
+          },
+          {
+            "value": "lift",
+            "label": "Lift"
+          },
+          {
+            "value": "glow",
+            "label": "Glow - brightness and glow"
+          },
+          {
+            "value": "rotate",
+            "label": "Rotate - full 360° spin"
+          },
+          {
+            "value": "brightness",
+            "label": "Brightness"
+          }, 
+          {
+            "value": "flip",
+            "label": "Flip"
+          },     
+          {
+            "value": "point-zoom",
+            "label": "Point zoom"
+          },  
+          {
+            "value": "blur-zoom",
+            "label": "Blur zoom"
+          },            
+          {
+            "value": "rotate-scale",
+            "label": "Rotate and scale"
+          },
+          {
+            "value": "colorize",
+            "label": "Colorize"
+          },
+          {
+            "value": "slide",
+            "label": "Slide - move to right"
+          },
+          {
+            "value": "bounce",
+            "label": "Bounce - elastic scale"
+          },
+          {
+            "value": "grayscale",
+            "label": "Grayscale - color on hover"
+          },
+          {
+            "value": "sepia",
+            "label": "Sepia - sepia tone on hover"
+          }
+        ],
+        "default": "zoom",
+        "visible_if": "{{ section.settings.use_hover_animation }}"
+      },
+      {
+        "type": "range",
+        "id": "hover_min_size",
+        "min": 50,
+        "max": 500,
+        "step": 50,
+        "unit": "px",
+        "label": "Minimum image size",
+        "info": "Only animate images that are at least this size.",
+        "default": 100,
+        "visible_if": "{{ section.settings.use_hover_animation }}"
+      },
+      {
+        "type": "range",
+        "id": "hover_max_size",
+        "min": 500,
+        "max": 2000,
+        "step": 100,
+        "unit": "px",
+        "label": "Maximum image size",
+        "info": "Only animate images that are at most this size.",
+        "default": 1000,
+        "visible_if": "{{ section.settings.use_hover_animation }}"
+      }
+    ],
+    "presets": [
+      {
+        "name": "SS - Animate section"
+      }
+    ]
+  }
+{% endschema %}
